@@ -1,21 +1,19 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const chats = require('./data/data');
+const connectDB = require('./config/db');
+const userRoutes = require('./routes/userRoutes');
+const bodyParser = require('body-parser');
 
+dotenv.config({
+    path: '../.env'
+});
+connectDB();
 const app = express();
-dotenv.config();
 
-app.get('/', (req, res) => {
-    res.end('Chatly server created!');
-}); 
+app.use(express.json()); // to accept json data
 
-app.get('/api/chat', (req, res) => {
-    res.send(chats)
-});
+app.use("/api/user", userRoutes);
 
-app.get('/api/chat/:id', (req, res) => {
-    const singleChat = chats.find(c => c._id === req.params.id);
-    res.send(singleChat);
-});
 
-app.listen(process.env.PORT, console.log("server is started"));
+app.listen(5000, console.log(`server is running on port 5000`));
