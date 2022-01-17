@@ -12,10 +12,9 @@ const allusers = asyncHandler(async(req, res) => {
     ]
   } : {}
   
-
   const users = await User.find(keyword).find({_id: {$ne : req.user.id}})
 
-  console.log(users)
+  
   res.send(users)
 })
 
