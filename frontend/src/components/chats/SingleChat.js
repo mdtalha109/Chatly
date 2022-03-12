@@ -1,9 +1,9 @@
 
-import { Box, FormControl, IconButton, Input, Spinner, Text, useToast } from '@chakra-ui/react'
+import { Box, Button, FormControl, IconButton, Input, Spinner, Text, useToast } from '@chakra-ui/react'
 import React, { useEffect, useState } from 'react'
 import { ChatState } from '../../Context/chatProvider'
 import { getSender } from '../../config/chatLogics';
-import { ArrowBackIcon } from "@chakra-ui/icons";
+import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import axios from 'axios';
 import './styles/messageStyle.css'
 import ScrollableChat from './ScrollableChat';
@@ -89,7 +89,7 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
     
 
     const sendMessage = async(e) => {
-        if(e.key === "Enter" && newMessage){
+        if(newMessage){
             try{    
                 const config = {
                     headers: {
@@ -158,7 +158,7 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                          p={3}
                          bg="#E8E8E8"
                          w="100%"
-                         h="100%"
+                         h="90%"
                          borderRadius="lg"
                          overflowY="hidden"
                         >
@@ -176,14 +176,24 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                                 
                               )
                             }
-                            <FormControl onKeyDown={sendMessage} isRequiredmt={3}>
-                                <Input
-                                    variant="filled"
-                                    bg="#E0E0E0"
-                                    placeholder='Enter a message...'
-                                    onChange={typingHandler}
-                                    value={newMessage}
-                                />
+                            <FormControl  isRequiredmt={3}>
+                                <div style={{display:"flex", marginTop:"10px"}}>
+                                    <Input
+                                        variant="filled"
+                                        bg="#E0E0E0"
+                                        borderColor="black"
+                                        placeholder='Enter a message...'
+                                        onChange={typingHandler}
+                                        value={newMessage}
+                                        
+                                    />
+
+                                    <Button style={{width:"10%", backgroundColor:"#2B3856", marginLeft:"10px"}} onClick={sendMessage}> <ArrowForwardIcon/> </Button>
+
+                                    
+                                </div>
+
+                                
                                 
                             </FormControl>
                         </Box>
