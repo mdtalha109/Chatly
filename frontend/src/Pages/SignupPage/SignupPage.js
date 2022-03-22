@@ -84,7 +84,7 @@ const SignupPage = () => {
                   "Content-type": "application/json",
                 },
               };    
-            const {data} = await axios.post("http://localhost:5000/api/user", {name, email, password, pic}, config)
+            const {data} = await axios.post("https://chatly-realtime-chat.herokuapp.com/api/user", {name, email, password, pic}, config)
             toast({
                 title: 'Congratulations!',
                 description: "Account created successfully!",

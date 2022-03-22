@@ -12,7 +12,6 @@ const MyChats = ({fetchAgain}) => {
     const toast = useToast();
 
     const fetchChats = async () => {
-        
         try {
           const config = {
             headers: {
@@ -20,11 +19,8 @@ const MyChats = ({fetchAgain}) => {
             },
           };
     
-          const { data } = await axios.get("http://localhost:5000/api/chat", config);
+          const { data } = await axios.get("https://chatly-realtime-chat.herokuapp.com/api/chat", config);
           setChats(data);
-        
-
-         
         } catch (error) {
           toast({
             title: "Error Occured!",
@@ -91,6 +87,8 @@ const MyChats = ({fetchAgain}) => {
                   bg={selectedChat === chat ? "#2B3856" : "#E8E8E8"}
                   color={selectedChat === chat ? "white" : "black"}
                   cursor="pointer"
+                  boxShadow="base"
+                  
                 
                 >
                   <Text>

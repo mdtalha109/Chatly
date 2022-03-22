@@ -5,31 +5,37 @@ import ChatBox from "../components/chats/ChatBox.js"
 
 import { ChatState } from "../Context/chatProvider";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { position } from "@chakra-ui/react";
 
 
 const ChatPage = () => {
 
     const { user } = ChatState();
     const navigate = useNavigate()
+    const [fetchAgain, setfetchAgain] = useState(false)
 
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        
-
         if(!userInfo) navigate('/')
     }, [navigate]);
     
 
     return (
-        <div style={{width: "100%"}}>
+        <>
+
+            
+    
+         
             {user && <SideDrawer/>}
-            <Box d="flex" bg='#6b9cff' justifyContent="space-between" w="100%" h="91.5vh">
-                {user && <MyChats/> }
-                {user && <ChatBox/>}
-                
-            </Box>
-        </div>
+            <div >
+                    <Box d="flex" justifyContent="space-between" w="100%" h="90vh" >
+                        {user && <MyChats fetchAgain = {fetchAgain} /> }
+                        {user && <ChatBox fetchAgain = {fetchAgain} setfetchAgain = {setfetchAgain}/>} 
+                    </Box>
+            </div>
+         </>
+    
     )
 }
 

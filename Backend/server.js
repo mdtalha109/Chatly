@@ -8,10 +8,12 @@ const messageRoutes = require('./routes/messageRoutes')
 const bodyparser = require('body-parser');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 var cors = require('cors')
+const path = require('path')
 
 dotenv.config({
-    path: '../.env'
+  path: '../.env'
 });
+
 connectDB();
 const app = express();
 app.use(cors())
@@ -25,9 +27,29 @@ app.use("/api/user", userRoutes)
 app.use('/api/chat', chatRoutes)
 app.use('/api/message', messageRoutes)
 
+//Deployement
+
+const __dirname1 = path.resolve()
 
 
-const server = app.listen(5000, console.log(`server is running on port 5000`));
+if(process.env.NODE_ENV === 'production'){
+  app.use(express.static(path.join(__dirname1, "../frontend/build")));
+
+  app.get('*', (req, res)=> {
+    res.sendFile(path.resolve(__dirname1, "frontend","build","index.html"))
+  })
+}
+else{
+  app.get('/', (req, res) => {
+    res.send('API running')
+  })
+}
+
+
+const PORT = process.env.PORT || 5000
+
+
+const server = app.listen(PORT, console.log(`server is running on port ${process.env.PORT}`));
 
 
 const io = require("socket.io")(server, {
@@ -41,14 +63,13 @@ const io = require("socket.io")(server, {
   io.on("connection", (socket) => {
         console.log("Connected to socket.io");
         socket.on("setup", (userData) => {
-            console.log(userData._id)
+          
             socket.join(userData._id);
             socket.emit("connected");
         });
 
         socket.on('join chat', (room) => {
             socket.join(room)
-            console.log('user joined room: ' + room)
         })
 
         socket.on("new message", (newMessageRecieved) => {
@@ -62,6 +83,11 @@ const io = require("socket.io")(server, {
               socket.in(user._id).emit("message recieved", newMessageRecieved);
             });
           }); 
+
+          socket.off("setup", () => {
+            console.log("USER DISCONNECTED");
+            socket.leave(userData._id);
+          });
   });
 
 

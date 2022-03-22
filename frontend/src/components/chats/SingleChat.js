@@ -9,11 +9,8 @@ import './styles/messageStyle.css'
 import ScrollableChat from './ScrollableChat';
 import { io } from "socket.io-client";
 
-const ENDPOINT = "http://localhost:5000/";
+const ENDPOINT = "https://chatly-realtime-chat.herokuapp.com/";
 var socket, selectedChatCompare;
-
-
-
 
 const SingleChat = ({fetchAgain, setFetchAgain}) => {
     const [messages, setMessages] = useState([])
@@ -68,11 +65,12 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                 }
             }
             setLoading(true)
-            const {data} = await axios.get(`http://localhost:5000/api/message/${selectedChat._id}`, config)
+            const {data} = await axios.get(`https://chatly-realtime-chat.herokuapp.com/api/message/${selectedChat._id}`, config)
             console.log(messages)
             setMessages(data);
             setLoading(false);
             socket.emit('join chat', selectedChat._id);
+            
         }
         catch(error) {
             toast({
@@ -98,15 +96,12 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                     }
                 }
                 setNewMessage('');
-                const {data} = await axios.post("http://localhost:5000/api/message", {
+                const {data} = await axios.post("https://chatly-realtime-chat.herokuapp.com/api/message", {
                     content: newMessage,
                     chatId: selectedChat._id
                 }, config)
-
                 console.log(data)
-
                 socket.emit('new message', data)
-
                 setMessages([...messages, data])
             }
             catch(error){
