@@ -45,7 +45,7 @@ const HomePage = () => {
                   "Content-type": "application/json",
                 },
               };    
-            const {data} = await axios.post("https://chatly-realtime-chat.herokuapp.com/api/user/login", { email, password}, config)
+            const {data} = await axios.post("http://localhost:5000/api/user/login", { email, password}, config)
             setloading(false)
             
             if(data){

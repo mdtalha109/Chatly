@@ -49,7 +49,7 @@ const SideDrawer = () => {
             },
           };
     
-           const { data } = await axios.get(`https://chatly-realtime-chat.herokuapp.com/api/user?search=${search}`, config);
+           const { data } = await axios.get(`http://localhost:5000/api/user?search=${search}`, config);
 
            setLoading(false)
            setSearchResult(data)
@@ -76,7 +76,7 @@ const SideDrawer = () => {
               },
             };
             
-            const { data } = await axios.post(`https://chatly-realtime-chat.herokuapp.com/api/chat`, { userId }, config);
+            const { data } = await axios.post(`http://localhost:5000/api/chat`, { userId }, config);
            console.log(data)
             // if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
             setSelectedChat(data);

@@ -9,7 +9,7 @@ import './styles/messageStyle.css'
 import ScrollableChat from './ScrollableChat';
 import { io } from "socket.io-client";
 
-const ENDPOINT = "https://chatly-realtime-chat.herokuapp.com/";
+const ENDPOINT = "http://localhost:5000/";
 var socket, selectedChatCompare;
 
 const SingleChat = ({fetchAgain, setFetchAgain}) => {
@@ -65,7 +65,7 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                 }
             }
             setLoading(true)
-            const {data} = await axios.get(`https://chatly-realtime-chat.herokuapp.com/api/message/${selectedChat._id}`, config)
+            const {data} = await axios.get(`http://localhost:5000/api/message/${selectedChat._id}`, config)
             console.log(messages)
             setMessages(data);
             setLoading(false);
@@ -96,7 +96,7 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                     }
                 }
                 setNewMessage('');
-                const {data} = await axios.post("https://chatly-realtime-chat.herokuapp.com/api/message", {
+                const {data} = await axios.post("http://localhost:5000/api/message", {
                     content: newMessage,
                     chatId: selectedChat._id
                 }, config)

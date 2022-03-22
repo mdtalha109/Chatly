@@ -19,7 +19,7 @@ const MyChats = ({fetchAgain}) => {
             },
           };
     
-          const { data } = await axios.get("https://chatly-realtime-chat.herokuapp.com/api/chat", config);
+          const { data } = await axios.get("http://localhost:5000/api/chat", config);
           setChats(data);
         } catch (error) {
           toast({
