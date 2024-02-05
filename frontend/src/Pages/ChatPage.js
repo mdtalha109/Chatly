@@ -1,41 +1,49 @@
-import { Box } from "@chakra-ui/layout"
-import SideDrawer from "../components/chats/SideDrawer"
-import MyChats from "../components/chats/MyChats.js"
-import ChatBox from "../components/chats/ChatBox.js"
-
-import { ChatState } from "../Context/chatProvider";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { position } from "@chakra-ui/react";
+import { ChatState } from "../Context/chatProvider";
+
+import ChatBox from '../components/chats/ChatBox'
+import ChatList from "../components/chats/ChatList/index";
+import Header from "../components/chats/Header/Header";
 
 
 const ChatPage = () => {
 
-    const { user } = ChatState();
+    
     const navigate = useNavigate()
-    const [fetchAgain, setfetchAgain] = useState(false)
+    const [fetchAgain, setfetchAgain] = useState(false);
+    const [showChatList, setShowChatList] = useState(false)
+    
+
+
+    const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
 
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        if(!userInfo) navigate('/')
+        if (!userInfo) navigate('/')
     }, [navigate]);
-    
+
 
     return (
         <>
+            {user && <Header />}
+            {user &&
+                <div>
+                    <div className="flex w-full h-[90vh]" >
+                        <div className={`flex md:w-[30%] ${(showChatList) ? 'w-[100%] md:w-[30%]': 'md:block hidden' } ${selectedChat ? 'md:block hidden' : ''}  `}>
+                            <ChatList fetchAgain={fetchAgain} />
 
-            
-    
-         
-            {user && <SideDrawer/>}
-            <div >
-                    <Box d="flex" justifyContent="space-between" w="100%" h="90vh" >
-                        {user && <MyChats fetchAgain = {fetchAgain} /> }
-                        {user && <ChatBox fetchAgain = {fetchAgain} setfetchAgain = {setfetchAgain}/>} 
-                    </Box>
-            </div>
-         </>
-    
+                        </div>
+
+                        <div className={`flex flex-1  bg-blue-700  ${(selectedChat ) ? 'md:block block' : ''}` } >
+                            <ChatBox fetchAgain={fetchAgain} setfetchAgain={setfetchAgain}  setShowChatList={setShowChatList} showChatList={showChatList}/>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </>
+
     )
 }
 
