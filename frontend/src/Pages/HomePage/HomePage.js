@@ -4,6 +4,8 @@ import { useToast } from '@chakra-ui/react'
 import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
 import './HomePage.css'
+import Input from '../../components/ui/Input/input'
+import Button from '../../components/ui/Button'
 
 
 const HomePage = () => {
@@ -11,7 +13,6 @@ const HomePage = () => {
     const toast = useToast()
     const navigate = useNavigate()
 
-    //if user is already logged in, navigate user to chat page
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo')) 
         if(userInfo){
@@ -45,7 +46,7 @@ const HomePage = () => {
                   "Content-type": "application/json",
                 },
               };    
-            const {data} = await axios.post("http://localhost:5000/api/user/login", { email, password}, config)
+            const {data} = await axios.post("http://localhost:4000/api/user/login", { email, password}, config)
             setloading(false)
             
             if(data){
@@ -74,22 +75,26 @@ const HomePage = () => {
 
 
     return (
-        <div className='home-container'>
-            <form className="register-form">
-                <input 
+        <div className='flex justify-center items-center bg-blue-500 h-screen w-screen'>
+            
+            <form className="flex flex-col gap-4 p-4 md:w-[20%] bg-white shadow-lg rounded-xl">
+            <h3 className='text-2xl mb-2 font-bold'>Login</h3>
+                <Input 
                     type="text" 
+                    label="Email"
                     placeholder="email address"
                     value={email}
                     onChange={(e) => setemail(e.target.value)}
                 />
-                <input 
+                <Input 
                     type="password" 
+                    label="Password"
                     placeholder="password"
                     value={password}
                     onChange={(e) => setpassword(e.target.value)}
                 />
-                <button onClick={submitHandler} >  {loading ? <Spinner/> : "Login"}    </button>
-                <p className="message">New User? <Link to="/signup">Create your account</Link></p>
+                <Button onClick={submitHandler} >  {loading ? <Spinner/> : "LOGIN"}  </Button>
+                <p className="text-center">New User? <Link to="/signup">Create your account</Link></p>
             </form> 
         </div>
     )
