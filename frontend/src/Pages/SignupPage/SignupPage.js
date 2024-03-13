@@ -4,6 +4,8 @@ import { useToast } from '@chakra-ui/react'
 import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
 import './SignupPage.css'
+import Input from '../../components/ui/Input/input'
+import Button from '../../components/ui/Button'
 
 const SignupPage = () => {
     const toast = useToast()
@@ -84,7 +86,7 @@ const SignupPage = () => {
                   "Content-type": "application/json",
                 },
               };    
-            const {data} = await axios.post("https://chatly-realtime-chat.herokuapp.com/api/user", {name, email, password, pic}, config)
+            const {data} = await axios.post("http://localhost:4000/api/user", {name, email, password, pic}, config)
             toast({
                 title: 'Congratulations!',
                 description: "Account created successfully!",
@@ -110,45 +112,51 @@ const SignupPage = () => {
         
     }
     return (
-        <div className='home-container'>
-        <form className="register-form">
-            <input 
+        <div className='flex justify-center items-center bg-blue-500 h-screen w-screen'>
+        <form className="flex flex-col gap-4 p-4 md:w-[30%] bg-white shadow-lg rounded-xl">
+        <h3 className='text-2xl mb-2 font-bold'>Register</h3>
+            <Input 
                 type="text" 
-                placeholder="name" 
+                label="Name" 
+                placeholder="name"
                 value={name} 
                 onChange={(e)=> setname(e.target.value)}
             />
 
-            <input 
+            <Input 
                 type="email" 
+                label="Email" 
                 placeholder="email address"
                 value={email} 
                 onChange={(e)=> setemail(e.target.value)}
             />
 
-            <input 
+            <Input 
                 type="password" 
+                label="Password" 
                 placeholder="password"
                 value={password} 
                 onChange={(e)=> setpassword(e.target.value)
             }/>
 
-            <input 
+            <Input 
                 type="password" 
+                label="Confirm Password" 
                 placeholder="Confirm password"
                 value={confirmPassword} 
                 onChange={(e)=> setconfirmPassword(e.target.value)}
             />
-            <input 
+            <Input 
                 type="file" 
+                label="Profile Picture"
                 placeholder="Upload your profile picture"
                 
                 onChange={(e) => postDetails(e.target.files[0])}
             />
-            <button onClick={submitHandler}>
+            <Button onClick={submitHandler}>
                {loading ? <Spinner/> : "Create Account"} 
-            </button>
-            <p className="message">Already registered? <Link to="/">Login</Link></p>
+            </Button>
+            <p className="text-center">Already registered? <Link to="/">Login</Link></p>
         </form>
         </div>
     )
