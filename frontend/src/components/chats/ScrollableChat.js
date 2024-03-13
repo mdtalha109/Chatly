@@ -1,29 +1,30 @@
-import { Avatar, Tooltip } from '@chakra-ui/react'
-import React from 'react'
-import ScrollableFeed from 'react-scrollable-feed'
+import React, { useEffect, useRef } from 'react'
 import { isLastMessage, isSameSender, isSameSenderMargin, isSameUser } from '../../config/chatLogics'
 import { ChatState } from '../../Context/chatProvider'
 import { motion } from "framer-motion";
 
 const ScrollableChat = ({ messages }) => {
+  console.log('messages: ', messages)
   const { user } = ChatState()
+  const scrollRef = useRef();
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView();
+  }, [messages]);
+
   return (
-    <ScrollableFeed>
+    <div className='overflow-y-auto scroll-smooth'>
       {messages &&
         messages.map((m, i) => (
-          <div style={{ display: "flex" }} key={i}>
+          <div ref={scrollRef} className='flex items-center' key={i}>
             {(isSameSender(messages, m, i, user._id) ||
               isLastMessage(messages, i, user._id)) && (
-                <Tooltip label={m.sender.name} placement="bottom-start" hasArrow>
-                  <Avatar
-                    mt="7px"
-                    mr={1}
-                    size="sm"
-                    cursor="pointer"
-                    name={m.sender.name}
-                    src={m.sender.pic}
-                  />
-                </Tooltip>
+                <img
+                  src={m.sender.pic}
+                  alt='pic'
+                  className={`rounded-full h-8 w-8 `}
+               />
+
               )}
             <motion.div
               style={{
@@ -39,13 +40,13 @@ const ScrollableChat = ({ messages }) => {
               animate={{ opacity: 1 }}
               initial={{ opacity: 0 }}
               transition={{ ease: "easeOut", duration: 2 }}
-              // layoutId="underline"
             >
               {m.content}
+              
             </motion.div>
           </div>
         ))}
-    </ScrollableFeed>
+    </div>
   )
 }
 
