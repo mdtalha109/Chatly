@@ -50,7 +50,7 @@ Modal.Header = function Header({ className, children }) {
 };
 
 Modal.Body = function Body({ children }) {
-  return <div className="md:p-4 relative z-9999999 grow overflow-auto ">{children}</div>;
+  return <div className="md:p-4 p-2 relative z-9999999 grow overflow-auto ">{children}</div>;
 };
 
 Modal.Footer = function Footer({ children }) {
