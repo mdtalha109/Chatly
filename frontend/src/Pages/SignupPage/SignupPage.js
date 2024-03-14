@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
 import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
-import './SignupPage.css'
 import Input from '../../components/ui/Input/input'
 import Button from '../../components/ui/Button'
 
@@ -31,7 +30,7 @@ const SignupPage = () => {
             return;
         }
 
-        if(pic.type  === "Image/jpeg" || "Image/png"){
+        if(pic.type  === "Image/jpeg" || pic.type ==="Image/png"){
             const data = new FormData()
             data.append("file", pic)
             data.append("upload_preset", "chatly")
@@ -51,7 +50,14 @@ const SignupPage = () => {
                   setloading(false)
               })
         } else{
-            console.log("else part")
+            setloading(false);
+            toast({
+                title: 'oops!',
+                description: "Media type not allowed",
+                status: 'warning',
+                duration: 5000,
+                isClosable: true,
+              })
         }
         
     }
