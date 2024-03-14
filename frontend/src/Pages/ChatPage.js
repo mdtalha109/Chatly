@@ -4,7 +4,7 @@ import { ChatState } from "../Context/chatProvider";
 
 import ChatBox from '../components/chats/ChatBox'
 import ChatList from "../components/chats/ChatList/index";
-import Header from "../components/chats/Header/Header";
+import Header from "../components/Header/Header";
 
 
 const ChatPage = () => {
@@ -16,7 +16,7 @@ const ChatPage = () => {
     
 
 
-    const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
+    const { selectedChat, user } = ChatState();
 
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
