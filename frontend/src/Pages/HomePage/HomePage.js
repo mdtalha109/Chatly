@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
 import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
-import './HomePage.css'
 import Input from '../../components/ui/Input/input'
 import Button from '../../components/ui/Button'
 
