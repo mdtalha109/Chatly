@@ -64,7 +64,7 @@ const HomePage = () => {
             setloading(false)  
             toast({
                 title: 'Sorry!',
-                description: err.response.data.message,
+                description: err?.response?.data?.message,
                 status: 'warning',
                 duration: 5000,
                 isClosable: true,
@@ -77,8 +77,9 @@ const HomePage = () => {
         <div className='flex justify-center items-center bg-blue-500 h-screen w-screen'>
             
             <form className="flex flex-col gap-4 p-4 md:w-[20%] bg-white shadow-lg rounded-xl">
-            <h3 className='text-2xl mb-2 font-bold'>Login</h3>
+                <h3 className='text-2xl mb-2 font-bold'>Login</h3>
                 <Input 
+                    id="user_email"
                     type="text" 
                     label="Email"
                     placeholder="email address"
@@ -86,6 +87,7 @@ const HomePage = () => {
                     onChange={(e) => setemail(e.target.value)}
                 />
                 <Input 
+                    id="user_password"
                     type="password" 
                     label="Password"
                     placeholder="password"
