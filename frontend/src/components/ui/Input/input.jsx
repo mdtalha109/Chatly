@@ -1,14 +1,15 @@
 import React from 'react';
 
-const Input = React.forwardRef(({ label, placeholder, value, onChange, className, style, type = 'text', ...rest }, ref) => {
+const Input = React.forwardRef(({ id, label, placeholder, value, onChange, className, style, type = 'text', ...rest }, ref) => {
   const inputStyle = {
     ...style
   };
 
   return (
     <div className={`input ${className}`} style={inputStyle}>
-      {label && <label className="block mb-2 text-xs">{label}</label>}
+      {label && <label className="block mb-2 text-xs" htmlFor={`${id}`}>{label}</label>}
       <input
+        id={id}
         ref={ref}
         type={type}
         placeholder={placeholder}
