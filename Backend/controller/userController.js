@@ -7,8 +7,8 @@ const generateToken = require("../config/generateToken");
 const allusers = asyncHandler(async(req, res) => {
   const keyword = req.query.search ? {
     $or : [
-      {name: {$regex: req.query.search, $options: '1'}},
-      {email: {$regex: req.query.search, $options: '1'}}
+      {name: {$regex: req.query.search}},
+      {email: {$regex: req.query.search}}
     ]
   } : {}
   
@@ -16,7 +16,7 @@ const allusers = asyncHandler(async(req, res) => {
   res.send(users)
 })
 
-
+  
 
 
 const registerUser = asyncHandler(async (req, res) => {
