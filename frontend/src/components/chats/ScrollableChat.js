@@ -25,7 +25,8 @@ const ScrollableChat = ({ messages }) => {
                   className={`rounded-full h-8 w-8 `}
                />
 
-              )}
+            )}
+
             <motion.div
               style={{
                 backgroundColor: `${m.sender._id === user._id ? "#0EA487" : "#2B3856"
@@ -41,7 +42,10 @@ const ScrollableChat = ({ messages }) => {
               initial={{ opacity: 0 }}
               transition={{ ease: "easeOut", duration: 2 }}
             >
+              {m.image ? <img src={m.image} alt='message_image' className=' h-[450px] object-contain w-max'/> : <></>}
               {m.content}
+
+              
               
             </motion.div>
           </div>

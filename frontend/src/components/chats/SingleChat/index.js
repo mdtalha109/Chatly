@@ -2,7 +2,7 @@
 import React from 'react'
 import { Spinner} from '@chakra-ui/react'
 
-import { IoSend } from "react-icons/io5";
+import { IoSend, IoCamera } from "react-icons/io5";
 import { IoIosArrowBack } from "react-icons/io";
 
 import { ChatState } from '../../../Context/chatProvider';
@@ -23,9 +23,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
         messages,
         loading,
         chatInputRef,
+        image,
         newMessage,
         typingHandler,
         sendMessage,
+        handleImageUpload
     } = useSingleChat(fetchAgain, setFetchAgain)
 
 
@@ -55,17 +57,49 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
                                 <ScrollableChat messages={messages} />
                             )
                         }
+
                        
-                        <div className="flex mt-10 md:gap-5 gap-2 items-stretch">
-                            <Input
-                                ref={chatInputRef}
-                                className="flex-1"
-                                placeholder='Enter a message...'
-                                onChange={typingHandler}
-                                value={newMessage}
-                                onKeyDown= {(e) => e.key === 'Enter' ? sendMessage(): ''}
-                            />
-                            <Button className='md:w-[5%] w-[15%]' onClick={sendMessage}>  <IoSend /> </Button>
+                       
+                        <div className="flex flex-col mt-10 md:gap-5 gap-2 items-stretch">
+                            {
+                                image ? 
+                                    <div className='relative shadow-lg' style={{width:"max-content"}}>
+                                        <img 
+                                            
+                                            src={image} 
+                                            alt='uploaded_image'
+                                            className='object-contain w-max'
+                                            style={{ height:"250px", backgroundPosition:"center"}}
+                                            />
+
+                                        <Button className='bg-black absolute top-2 left-2'>
+                                            X
+                                        </Button>
+                                        
+
+                                    </div>
+                                    : <></> 
+                            }
+                            <div className='flex md:gap-5 gap-2 items-stretch'>
+                                <Input
+                                    ref={chatInputRef}
+                                    className="flex-1"
+                                    placeholder='Enter a message...'
+                                    onChange={typingHandler}
+                                    value={newMessage}
+                                    onKeyDown= {(e) => e.key === 'Enter' ? sendMessage(): ''}
+                                />
+                                <Input 
+                                    type="file" 
+                                    id='file'
+                                    placeholder="Upload your profile picture"
+                                    className="hidden"
+                                    onChange={(e) => handleImageUpload(e.target.files[0])}
+                                />
+                                <label className='flex justify-center items-center text-2xl' htmlFor='file'><IoCamera/></label>
+                                <Button className='md:w-[5%] w-[15%]' onClick={sendMessage}>  <IoSend /> </Button>
+                            </div>
+                            
                         </div>
                         
                     </div>
