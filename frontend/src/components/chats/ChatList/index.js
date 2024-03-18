@@ -43,10 +43,10 @@ const ChatList = ({ fetchAgain }) => {
 
                   {chat.latestMessage && (
                     <p className='text-xs'>
-                      {chat.latestMessage.sender.name} :
-                      {chat.latestMessage.content.length > 50
-                        ? chat.latestMessage.content.substring(0, 51) + "..."
-                        : chat.latestMessage.content}
+                      {chat?.latestMessage?.sender?.name} :
+                      {chat?.latestMessage?.content?.length > 50
+                        ? chat?.latestMessage?.content?.substring(0, 51) + "..."
+                        : chat?.latestMessage?.content}
                     </p>
                   )}
                 </div>
