@@ -1,39 +1,35 @@
-const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 const generateToken = require("../config/generateToken");
+const ApiResponse = require("../utils/apiResponse");
+const ApiError = require("../utils/apiError");
+const asyncHandler = require("../utils/asyncHandler.js");
 
-
-//api/user?search=jnxjka
-const allusers = asyncHandler(async(req, res) => {
-  const keyword = req.query.search ? {
-    $or : [
-      {name: {$regex: req.query.search}},
-      {email: {$regex: req.query.search}}
+// Get all users
+const allUsers = asyncHandler(async (req, res, next) => {
+  const { search } = req.query;
+  const keyword = search ? {
+    $or: [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } }
     ]
-  } : {}
-  
-  const users = await User.find(keyword).find({_id: {$ne : req.user.id}})
-  res.send(users)
-})
+  } : {};
 
-  
+  const users = await User.find(keyword).select('-password');
+  res.status(200).json(new ApiResponse(200, "Users fetched successfully!", users, true));
+});
 
-
-const registerUser = asyncHandler(async (req, res) => {
+// Register a new user
+const registerUser = asyncHandler(async (req, res, next) => {
   const { name, email, password, pic } = req.body;
 
-
   if (!name || !email || !password) {
-    res.status(400);
-    throw new Error("Please Enter all the Feilds");
+    throw new ApiError(400, "All fields are required");
   }
 
-  const userExists = await User.findOne({ email });
+  let userExists = await User.findOne({ email });
 
   if (userExists) {
-    return res.status(400).json({
-      message: 'Email already exist' // <-- I want to pass message here
-  })
+    throw  new ApiError(400, "User already exists");
   }
 
   const user = await User.create({
@@ -44,41 +40,39 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (user) {
-    res.status(201).json({
+    const responseData = {
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
       pic: user.pic,
       token: generateToken(user._id),
-    });
+    };
+    res.status(201).json(new ApiResponse(201, "User Created", responseData, true));
   } else {
-    res.status(400);
-    throw new Error("User not found");
+    return new ApiError(500, "Something went wrong");
   }
 });
 
-
-const authUser = asyncHandler(async (req, res) => {
+// Authenticate user
+const authUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      pic: user.pic,
-      token: generateToken(user._id),
-    });
-  } else {
-    return res.status(400).json({
-      message: 'Email or password incorrect' // <-- I want to pass message here
-  })
+  if (!user || !(await user.matchPassword(password))) {
+    return new ApiError(401, "Email or password incorrect");
   }
+
+  const responseData = {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    pic: user.pic,
+    token: generateToken(user._id),
+  };
+  res.status(200).json(new ApiResponse(200, "User data", responseData, true));
 });
 
-
-module.exports = { registerUser, authUser, allusers };
+module.exports = { registerUser, authUser, allUsers };
