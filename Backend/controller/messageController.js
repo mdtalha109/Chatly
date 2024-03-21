@@ -1,7 +1,9 @@
-const asyncHandler = require("express-async-handler");
 const Message = require("../models/messageModel");
 const User = require("../models/userModel");
 const Chat = require("../models/chatModel");
+const ApiResponse = require("../utils/apiResponse");
+const ApiError = require("../utils/apiError");
+const asyncHandler = require("../utils/asyncHandler");
 
 
 const allMessages = asyncHandler(async (req, res) => {
@@ -9,25 +11,26 @@ const allMessages = asyncHandler(async (req, res) => {
     const messages = await Message.find({ chat: req.params.chatId })
       .populate("sender", "name pic email")
       .populate("chat");
-    res.json(messages);
+      
+    res.status(200).json(new ApiResponse(200, "Messages fetched successfully", messages, true));
   } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+    throw new ApiError(400, "Something went wrong while fetching messages");
   }
 });
 
 
 const sendMessage = asyncHandler(async (req, res) => {
-  const { content, chatId } = req.body;
+  const { content, chatId, image } = req.body;
 
-  if (!content || !chatId) {
-    console.log("Invalid data passed into request");
-    return res.sendStatus(400);
+
+  if (!chatId || (!content && !image)) {
+    throw new ApiError(400, "Message in empty!")
   }
 
-  var newMessage = {
+  const newMessage = {
     sender: req.user._id,
-    content: content,
+    content,
+    image,
     chat: chatId,
   };
 
@@ -42,11 +45,11 @@ const sendMessage = asyncHandler(async (req, res) => {
     });
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
+    res.status(200).json(new ApiResponse(200, "Message sent sucessfully", message, true));
 
-    res.json(message);
   } catch (error) {
     res.status(400);
-    throw new Error(error.message);
+    throw new ApiError("Error in sending message, Please try again")
   }
 });
 
