@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { ChatState } from '../../../Context/chatProvider';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BaseConfig } from '../../../config/baseConfig';
 
 const useHeader = () => {
     const [search, setSearch] = useState();
@@ -38,10 +39,10 @@ const useHeader = () => {
             },
           };
     
-           const { data } = await axios.get(`http://localhost:4000/api/user?search=${search}`, config);
+           const { data } = await axios.get(`${BaseConfig.BASE_API_URL}/user?search=${search}`, config);
 
            setLoading(false)
-           setSearchResult(data)
+           setSearchResult(data.data)
         }
         catch(error){
            
@@ -65,8 +66,9 @@ const useHeader = () => {
               },
             };
             
-            const { data } = await axios.post(`http://localhost:4000/api/chat`, { userId }, config);
-            setSelectedChat(data);
+            const { data } = await axios.post(`${BaseConfig.BASE_API_URL}/chat`, { userId }, config);
+            console.log("datadata: ", data)
+            setSelectedChat(data.data);
             setLoadingChat(false);
             onClose();
            }

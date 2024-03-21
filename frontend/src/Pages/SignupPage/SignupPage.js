@@ -5,6 +5,7 @@ import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
 import Input from '../../components/ui/Input/input'
 import Button from '../../components/ui/Button'
+import { BaseConfig } from '../../config/baseConfig'
 
 const SignupPage = () => {
     const toast = useToast()
@@ -30,7 +31,7 @@ const SignupPage = () => {
             return;
         }
 
-        if(pic.type  === "Image/jpeg" || pic.type ==="Image/png"){
+        if(pic.type.startsWith('image/')){
             const data = new FormData()
             data.append("file", pic)
             data.append("upload_preset", "chatly")
@@ -92,7 +93,7 @@ const SignupPage = () => {
                   "Content-type": "application/json",
                 },
               };    
-            const {data} = await axios.post("http://localhost:4000/api/user", {name, email, password, pic}, config)
+            const {data} = await axios.post(`${BaseConfig.BASE_API_URL}/user`, {name, email, password, pic}, config)
             toast({
                 title: 'Congratulations!',
                 description: "Account created successfully!",
@@ -105,7 +106,7 @@ const SignupPage = () => {
             localStorage.setItem('suerInfo', JSON.stringify(data))
 
         }catch (err){
-            // console.log(err.response.data)
+            console.log(err.response.data)
             toast({
                 title: 'Sorry!',
                 description: err.response.data.message,
