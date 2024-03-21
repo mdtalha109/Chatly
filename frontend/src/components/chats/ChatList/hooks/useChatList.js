@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useToast } from '@chakra-ui/react';
 import { ChatState } from '../../../../Context/chatProvider';
 import { getSender } from '../../../../config/chatLogics';
+import { BaseConfig } from '../../../../config/baseConfig';
 
 const useChatList = ({fetchAgain, setFetchAgain}) => {
     const [loggedUser, setLoggedUser] = useState();
@@ -17,8 +18,8 @@ const useChatList = ({fetchAgain, setFetchAgain}) => {
             },
           };
     
-          const { data } = await axios.get("http://localhost:4000/api/chat", config);
-          setChats(data);
+          const { data } = await axios.get(`${BaseConfig.BASE_API_URL}/chat`, config);
+          setChats(data.data);
         } catch (error) {
           toast({
             title: "Error Occured!",

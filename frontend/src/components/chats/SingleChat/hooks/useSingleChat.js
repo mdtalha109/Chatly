@@ -6,9 +6,10 @@ import { io } from "socket.io-client";
 
 import { ChatState } from '../../../../Context/chatProvider';
 import { getSender } from '../../../../config/chatLogics';
+import { BaseConfig } from '../../../../config/baseConfig';
 
 
-const ENDPOINT = "http://localhost:4000/";
+const ENDPOINT = BaseConfig.BASE_SERVER_URL
 var socket, selectedChatCompare;
 
 const useSingleChat = () => {
@@ -78,9 +79,9 @@ const useSingleChat = () => {
                 }
             }
             setLoading(true)
-            const { data } = await axios.get(`http://localhost:4000/api/message/${selectedChat._id}`, config)
+            const { data } = await axios.get(`${BaseConfig.BASE_API_URL}/message/${selectedChat._id}`, config)
             console.log(messages)
-            setMessages(data);
+            setMessages(data.data);
             setLoading(false);
             socket.emit('join chat', selectedChat._id);
 
@@ -133,7 +134,7 @@ const useSingleChat = () => {
                 }
                 setNewMessage('');
                 setImage(null)
-                const { data } = await axios.post("http://localhost:4000/api/message", {
+                const { data } = await axios.post(`${BaseConfig.BASE_API_URL}/message`, {
                     content: newMessage,
                     image: image,
                     chatId: selectedChat._id

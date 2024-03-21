@@ -5,6 +5,7 @@ import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
 import Input from '../../components/ui/Input/input'
 import Button from '../../components/ui/Button'
+import { BaseConfig } from '../../config/baseConfig'
 
 
 const HomePage = () => {
@@ -45,7 +46,8 @@ const HomePage = () => {
                   "Content-type": "application/json",
                 },
               };    
-            const {data} = await axios.post("http://localhost:4000/api/user/login", { email, password}, config)
+            const {data} = await axios.post(`${BaseConfig.BASE_API_URL}/user/login`, { email, password}, config)
+            
             setloading(false)
             
             if(data){
@@ -57,7 +59,7 @@ const HomePage = () => {
                     isClosable: true,
                 })
 
-                localStorage.setItem('userInfo', JSON.stringify(data));
+                localStorage.setItem('userInfo', JSON.stringify(data.data));
                 navigate('/chat')
             }
         }catch(err){  
