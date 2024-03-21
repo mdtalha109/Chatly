@@ -61,7 +61,7 @@ const authUser = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email });
 
   if (!user || !(await user.matchPassword(password))) {
-    return new ApiError(401, "Email or password incorrect");
+    throw new ApiError(401, "Email or password incorrect");
   }
 
   const responseData = {
