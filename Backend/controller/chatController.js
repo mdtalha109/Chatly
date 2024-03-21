@@ -1,6 +1,8 @@
-const asyncHandler = require("express-async-handler");
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
+const ApiError = require("../utils/apiError");
+const ApiResponse = require("../utils/apiResponse");
+const asyncHandler = require("../utils/asyncHandler");
 
 //@description     Create or fetch One to One Chat
 //@route           POST /api/chat/
@@ -9,8 +11,7 @@ const accessChat = asyncHandler(async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
-    console.log("UserId param not sent with request");
-    return res.sendStatus(400);
+    throw new ApiError(400, "something went wrong")
   }
 
   
@@ -30,7 +31,7 @@ const accessChat = asyncHandler(async (req, res) => {
   });
 
   if (isChat.length > 0) {
-    res.send(isChat[0]);
+    res.status(200).json(new ApiResponse(200, "chat", isChat[0], true))
   } else {
     var chatData = {
       chatName: "sender",
@@ -44,10 +45,10 @@ const accessChat = asyncHandler(async (req, res) => {
         "users",
         "-password"
       );
-      res.status(200).json(FullChat);
+      res.status(200).json(new ApiResponse(200, "chat found", FullChat, true));
     } catch (error) {
       res.status(400);
-      throw new Error(error.message);
+      throw new ApiError(400, "something went wrong");
     }
   }
 });
@@ -66,11 +67,11 @@ const fetchChats = asyncHandler(async (req, res) => {
           path: "latestMessage.sender",
           select: "name pic email",
         });
-        res.status(200).send(results);
+        res.status(200).send(new ApiResponse(200, "chat fetched successfully!", results, true));
       });
   } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+    
+    throw new ApiError(400, "something went wrong")
   }
 });
 
@@ -79,15 +80,13 @@ const fetchChats = asyncHandler(async (req, res) => {
 //@access          Protected
 const createGroupChat = asyncHandler(async (req, res) => {
   if (!req.body.users || !req.body.name) {
-    return res.status(400).send({ message: "Please Fill all the feilds" });
+    throw new ApiError(400, "Please Fill all the feilds")
   }
 
   var users = JSON.parse(req.body.users);
 
   if (users.length < 2) {
-    return res
-      .status(400)
-      .send("More than 2 users are required to form a group chat");
+      throw new ApiError(400, "More than 2 users are required to form a group chat")
   }
 
   users.push(req.user);
@@ -104,10 +103,10 @@ const createGroupChat = asyncHandler(async (req, res) => {
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
 
-    res.status(200).json(fullGroupChat);
+    res.status(200).json(new ApiResponse(200, "group created", fullGroupChat, true));
+
   } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+    throw new ApiError("Error in creating group chat, Please try again!")
   }
 });
 
@@ -130,10 +129,9 @@ const renameGroup = asyncHandler(async (req, res) => {
     .populate("groupAdmin", "-password");
 
   if (!updatedChat) {
-    res.status(404);
-    throw new Error("Chat Not Found");
+    throw new ApiError(400, "Chat Not Found");
   } else {
-    res.json(updatedChat);
+    res.status(new ApiResponse(200, "Chat renamed successfully", updatedChat, true));
   }
 });
 
@@ -159,9 +157,9 @@ const removeFromGroup = asyncHandler(async (req, res) => {
 
   if (!removed) {
     res.status(404);
-    throw new Error("Chat Not Found");
+    throw new ApiError(400, "Chat Not Found");
   } else {
-    res.json(removed);
+    res.status(new ApiResponse(200, "removed group successfully", removed, true));
   }
 });
 
@@ -170,8 +168,6 @@ const removeFromGroup = asyncHandler(async (req, res) => {
 // @access  Protected
 const addToGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
-
-  // check if the requester is admin
 
   const added = await Chat.findByIdAndUpdate(
     chatId,
@@ -187,9 +183,10 @@ const addToGroup = asyncHandler(async (req, res) => {
 
   if (!added) {
     res.status(404);
-    throw new Error("Chat Not Found");
+    throw new ApiError(400, "Chat Not Found");
   } else {
-    res.json(added);
+    res.json();
+    res.status(new ApiResponse(200, "added to group successfully", added, true));
   }
 });
 
