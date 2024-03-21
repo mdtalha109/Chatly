@@ -6,13 +6,10 @@ const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes')
 const messageRoutes = require('./routes/messageRoutes')
 const bodyparser = require('body-parser');
-const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 var cors = require('cors')
 const path = require('path')
 
-dotenv.config({
-  path: '../.env'
-});
+dotenv.config();
 
 connectDB();
 const app = express();
@@ -48,13 +45,13 @@ else{
 const PORT = process.env.PORT || 4000
 
 
-const server = app.listen(PORT, console.log(`server is running on port ${process.env.PORT}`));
+const server = app.listen(PORT, console.log(`server is running on port ${PORT}`));
 
 
 const io = require("socket.io")(server, {
     pingTimeout: 60000,
     cors: {
-      origin: "http://localhost:3000",
+      origin: process.env.CLIENT_SOCKET_URL,
       // credentials: true,
     },
   });
