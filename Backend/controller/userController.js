@@ -14,7 +14,7 @@ const allUsers = asyncHandler(async (req, res, next) => {
     ]
   } : {};
 
-  const users = await User.find(keyword).select('-password');
+  const users = await User.find(keyword).find({ _id: { $ne: req.user._id } }).select('-password');
   res.status(200).json(new ApiResponse(200, "Users fetched successfully!", users, true));
 });
 
