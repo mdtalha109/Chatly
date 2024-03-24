@@ -12,12 +12,12 @@ import { BaseConfig } from '../../../../config/baseConfig';
 const ENDPOINT = BaseConfig.BASE_SERVER_URL
 var socket, selectedChatCompare;
 
-const useSingleChat = () => {
+const useSingleChat = (fetchAgain, setfetchAgain) => {
     const [messages, setMessages] = useState([])
     const [loading, setLoading] = useState(false)
     const [newMessage, setNewMessage] = useState()
     const [image, setImage] = useState(null)
-    const { user, selectedChat, setSelectedChat } = ChatState()
+    const { user, chats, setChats, selectedChat, setSelectedChat } = ChatState()
     const [socketConnected, setSocketConnected] = useState(false)
 
 
@@ -43,24 +43,50 @@ const useSingleChat = () => {
         selectedChatCompare = selectedChat
     }, [selectedChat])
 
-
-
     useEffect(() => {
         socket.on('message recieved', (newMessageRecieved) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
                 //give notification
+                // setfetchAgain(!fetchAgain)
+                setChats(prevChats =>  prevChats.map((chat) => {
+                    console.log("chat._id: ", chat._id)
+                    console.log("newMessageRecieved: ", newMessageRecieved)
+                    if(chat._id === newMessageRecieved.chat._id){
+                      
+                        chat.latestMessage.content = newMessageRecieved.content
+                    }
+                    return chat;
+                }))
             }
             else {
                 setMessages((prevMessages) => [...prevMessages, newMessageRecieved]);
+                // setfetchAgain(!fetchAgain)
+                console.log("all chats list: ", chats)
+
+                setChats(prevChats =>  prevChats.map((chat) => {
+                    if(chat._id === newMessageRecieved.chat._id){
+                      
+                        chat.latestMessage.content = newMessageRecieved.content
+                    }
+                    return chat;
+                }))
             }
         })
 
         socket.off('message recieved', (newMessageRecieved) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
                 //give notification
+                
             }
             else {
                 setMessages((prevMessages) => [...prevMessages, newMessageRecieved]);
+
+                console.log("all chats list: ", chats)
+
+                
+
+
+              
             }
         })
 
@@ -80,7 +106,7 @@ const useSingleChat = () => {
             }
             setLoading(true)
             const { data } = await axios.get(`${BaseConfig.BASE_API_URL}/message/${selectedChat._id}`, config)
-            console.log(messages)
+
             setMessages(data.data);
             setLoading(false);
             socket.emit('join chat', selectedChat._id);
@@ -156,7 +182,7 @@ const useSingleChat = () => {
 
 
     const handleImageUpload = async(image) => {
-        console.log("image: ", image)
+        
         if(image.type  === "Image/jpeg" || image.type ==="Image/png" || image.type ==="image/png"){
             const data = new FormData()
             data.append("file", image)
@@ -169,7 +195,7 @@ const useSingleChat = () => {
               .then(data => {
                 
                 setImage(data.url.toString())   
-                console.log("data.url.toString(): ", data.url.toString())
+               
               })
               .catch((err) => {
                   console.log(err)
