@@ -1,0 +1,9 @@
+openapi: 3.0.0
+info:
+  title: Chatly
+  description: Chat with your loved one!
+  version: 1.0.1
+
+servers:
+  - url: http://localhost:4000/api/vi
+    description: localhost version of our app

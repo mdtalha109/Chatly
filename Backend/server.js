@@ -8,6 +8,14 @@ const messageRoutes = require('./routes/messageRoutes')
 const bodyparser = require('body-parser');
 var cors = require('cors')
 const path = require('path')
+const fs = require('fs')
+
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yaml')
+
+const file  = fs.readFileSync('./swagger.yaml', 'utf8')
+const swaggerDocument = YAML.parse(file)
+
 
 dotenv.config();
 
@@ -18,6 +26,7 @@ app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyparser.urlencoded({ extended: true }));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 app.use("/api/user", userRoutes)
@@ -59,13 +68,14 @@ const io = require("socket.io")(server, {
   io.on("connection", (socket) => {
         console.log("Connected to socket.io");
         socket.on("setup", (userData) => {
+            
           
             socket.join(userData._id);
             socket.emit("connected");
         });
 
         socket.on('join chat', (room) => {
-            socket.join(room)
+            // socket.join(room)
         })
 
         socket.on("new message", (newMessageRecieved) => {
