@@ -5,5 +5,70 @@ info:
   version: 1.0.1
 
 servers:
-  - url: http://localhost:4000/api/vi
+  - url: http://localhost:4000/api
     description: localhost version of our app
+
+
+paths:
+  /user/login:
+    post:
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User logged in successfully
+                  data:
+                    $ref: '#/components/schemas/UserData'
+        '400':
+          description: Invalid request body
+        '401':
+          description: Unauthorized - Invalid email or password
+
+ components:
+  schemas:
+    UserData:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: User ID
+        name:
+          type: string
+          description: User's name
+        email:
+          type: string
+          description: User's email   
+        isAdmin:
+          type: boolean
+          description: Indicates if the user is an admin
+        pic:
+          type: string
+          description: URL to user's profile picture
+        token: 
+          type: string
+          description: JWT token
+      required:
+        - _id
+        - name
+        - email
+        - isAdmin
