@@ -13,7 +13,6 @@ const ChatPage = () => {
     const navigate = useNavigate()
     const [fetchAgain, setfetchAgain] = useState(false);
     const [showChatList, setShowChatList] = useState(false)
-    
 
 
     const { selectedChat, user } = ChatState();
@@ -22,7 +21,6 @@ const ChatPage = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         if (!userInfo) navigate('/')
     }, [navigate]);
-
 
     return (
         <>
@@ -35,7 +33,7 @@ const ChatPage = () => {
 
                         </div>
 
-                        <div className={`flex flex-1  bg-blue-700  ${(selectedChat ) ? 'md:block block' : ''}` } >
+                        <div className={`flex flex-1 md:max-w-[70%] overflow-y-hidden  bg-blue-700  ${(selectedChat ) ? 'md:block block' : ''}` } >
                             <ChatBox fetchAgain={fetchAgain} setfetchAgain={setfetchAgain}  setShowChatList={setShowChatList} showChatList={showChatList}/>
                         </div>
                     </div>
