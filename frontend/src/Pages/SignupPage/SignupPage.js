@@ -125,33 +125,41 @@ const SignupPage = () => {
             <Input 
                 type="text" 
                 label="Name" 
+                id="userName"
                 placeholder="name"
                 value={name} 
                 onChange={(e)=> setname(e.target.value)}
+                data-testid="user_name_input"
             />
 
             <Input 
                 type="email" 
                 label="Email" 
+                id="userEmail"
                 placeholder="email address"
                 value={email} 
                 onChange={(e)=> setemail(e.target.value)}
+                data-testid="user_email_input"
             />
 
             <Input 
                 type="password" 
                 label="Password" 
+                id="password"
                 placeholder="password"
                 value={password} 
-                onChange={(e)=> setpassword(e.target.value)
-            }/>
+                onChange={(e)=> setpassword(e.target.value)}
+                data-testid="user_password_input"
+            />
 
             <Input 
                 type="password" 
                 label="Confirm Password" 
+                id="confirm_password"
                 placeholder="Confirm password"
                 value={confirmPassword} 
                 onChange={(e)=> setconfirmPassword(e.target.value)}
+                data-testid="user_confirm_password_input"
             />
             <Input 
                 type="file" 
@@ -160,7 +168,7 @@ const SignupPage = () => {
                 
                 onChange={(e) => postDetails(e.target.files[0])}
             />
-            <Button onClick={submitHandler}>
+            <Button onClick={submitHandler} role='Button'>
                {loading ? <Spinner/> : "Create Account"} 
             </Button>
             <p className="text-center">Already registered? <Link to="/">Login</Link></p>
