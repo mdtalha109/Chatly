@@ -20,6 +20,7 @@ const SignupPage = () => {
 
     const postDetails = (pic) => {
         setloading(true);
+       
         if(pic === undefined){
             toast({
                 title: 'oops!',
@@ -36,7 +37,7 @@ const SignupPage = () => {
             data.append("file", pic)
             data.append("upload_preset", "chatly")
             data.append("cloud_name", "talhapro321")
-            fetch("https://api.cloudinary.com/v1_1/talhapro321/image/upload", {
+            fetch(BaseConfig.CLOUDINARY_URL, {
                 method: "POST",
                 body: data
             }).then((res) => res.json())
@@ -94,13 +95,14 @@ const SignupPage = () => {
                 },
               };    
             const {data} = await axios.post(`${BaseConfig.BASE_API_URL}/user`, {name, email, password, pic}, config)
+
             toast({
                 title: 'Congratulations!',
                 description: "Account created successfully!",
                 status: 'success',
                 duration: 5000,
                 isClosable: true,
-              })
+            })
 
             
             localStorage.setItem('suerInfo', JSON.stringify(data))
@@ -165,7 +167,7 @@ const SignupPage = () => {
                 type="file" 
                 label="Profile Picture"
                 placeholder="Upload your profile picture"
-                
+                data-testid="user_profile_pic"
                 onChange={(e) => postDetails(e.target.files[0])}
             />
             <Button onClick={submitHandler} role='Button'>
