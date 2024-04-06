@@ -1,17 +1,18 @@
 const express = require('express');
+const bodyparser = require('body-parser');
+var cors = require('cors')
+const path = require('path')
+const fs = require('fs')
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yaml');
+
 const dotenv = require('dotenv');
 const chats = require('./data/data');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const chatRoutes = require('./routes/chatRoutes')
 const messageRoutes = require('./routes/messageRoutes')
-const bodyparser = require('body-parser');
-var cors = require('cors')
-const path = require('path')
-const fs = require('fs')
-
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yaml')
+const socketEvent = require('./constant/socket');
 
 const file  = fs.readFileSync('./swagger.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
@@ -61,39 +62,44 @@ const io = require("socket.io")(server, {
     pingTimeout: 60000,
     cors: {
       origin: process.env.CLIENT_SOCKET_URL,
-      // credentials: true,
+       credentials: true,
     },
   });
 
   io.on("connection", (socket) => {
-        console.log("Connected to socket.io");
-        socket.on("setup", (userData) => {
+        socket.on(socketEvent.SETUP, (userData) => {
             
-          
             socket.join(userData._id);
-            socket.emit("connected");
+            socket.emit(socketEvent.CONNECTED);
         });
 
-        socket.on('join chat', (room) => {
-            // socket.join(room)
+        socket.on(socketEvent.JOIN_CHAT, (room) => {
+            socket.join(room)
         })
 
-        socket.on("new message", (newMessageRecieved) => {
+        socket.on(socketEvent.NEW_MESSAGE, (newMessageRecieved) => {
             var chat = newMessageRecieved.chat;
         
-            if (!chat.users) return console.log("chat.users not defined");
+            if (!chat.users) return
         
             chat.users.forEach((user) => {
               if (user._id == newMessageRecieved.sender._id) return;
         
-              socket.in(user._id).emit("message recieved", newMessageRecieved);
+              socket.in(user._id).emit(socketEvent.MESSAGE_RECIEVED, newMessageRecieved);
             });
           }); 
 
-          socket.off("setup", () => {
-            console.log("USER DISCONNECTED");
-            socket.leave(userData._id);
-          });
+        socket.on(socketEvent.TYPING, (roomId) => {
+          socket.in(roomId).emit(socketEvent.TYPING)
+        })
+
+        socket.on(socketEvent.STOP_TYPING, (roomId) => {
+          socket.in(roomId).emit(socketEvent.STOP_TYPING)
+        })
+
+        socket.off(socketEvent.SETUP, () => {
+          socket.leave(userData._id);
+        });
   });
 
 
