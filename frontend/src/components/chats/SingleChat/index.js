@@ -1,25 +1,24 @@
 
 import React from 'react'
-import { Spinner} from '@chakra-ui/react'
-
-import { IoSend, IoCamera } from "react-icons/io5";
-import { IoIosArrowBack } from "react-icons/io";
+import { Spinner } from '@chakra-ui/react'
 
 import { ChatState } from '../../../Context/chatProvider';
-import { Button, Input } from '../../ui'
 
 import ScrollableChat from '../ScrollableChat';
 import useSingleChat from './hooks/useSingleChat';
+import ChatHeader from '../chatHeader';
+import ChatFooter from '../ChatFooter';
+import NonSelectedChat from '../NonSelectedChat';
+import UploadImagePreview from '../UploadImagePreview';
 
 
 
 const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }) => {
     const { user } = ChatState()
-    
+
     const {
         selectedChat,
         setSelectedChat,
-        getSender,
         messages,
         loading,
         chatInputRef,
@@ -27,96 +26,70 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
         newMessage,
         typingHandler,
         sendMessage,
-        handleImageUpload
+        handleImageUpload,
+        scrollHandler,
+        istyping,
+        isUserActive,
+        cursorRef
     } = useSingleChat(fetchAgain, setFetchAgain)
 
 
     return (
         <>
-            {selectedChat ? ( 
-                <div className='h-full w-full flex flex-col'>
-                    <div className='flex px-2 py-4 items-center gap-2'>
-                        
-                        <div className='cursor-pointer'>
-                            <IoIosArrowBack onClick={() => setSelectedChat("")}/>
-                        </div>
-                        
-                        <span className='font-bold'>{getSender(user, selectedChat.users).name}</span>
+            {   selectedChat ? (
+                    <div className='h-full w-full flex flex-col'>
 
-                    </div>
-                    <div className="flex flex-col p-2 justify-end w-full bg-[#E8E8E8] items-stretch flex-1  overflow-y-scroll">
-                        {loading ? (
-                            <Spinner
-                                size="xl"
-                                w={20}
-                                h={20}
-                                alignSelf="center"
-                                margin="auto"
-                            />
-                            ) : (
-                                <ScrollableChat messages={messages} />
-                            )
-                        }
+                        {/* Chat Header */}
+                        <ChatHeader
+                            selectedChat={selectedChat}
+                            setSelectedChat={setSelectedChat}
+                            user={user}
+                            isUserActive={isUserActive}
+                        />
 
-                       
-                       
-                        <div className="flex flex-col mt-10 md:gap-5 gap-2 items-stretch">
-                            {
-                                image ? 
-                                    <div className='relative shadow-lg' style={{width:"max-content"}}>
-                                        <img 
-                                            
-                                            src={image} 
-                                            alt='uploaded_image'
-                                            className='object-contain w-max'
-                                            style={{ height:"250px", backgroundPosition:"center"}}
-                                            />
+                        <div className="flex flex-col p-2 justify-end w-full bg-[#E8E8E8] items-stretch flex-1  overflow-y-scroll">
+                            {loading ? (
+                                <Spinner
+                                    size="xl"
+                                    w={20}
+                                    h={20}
+                                    alignSelf="center"
+                                    margin="auto"
+                                />
+                            ) : <>
 
-                                        <Button className='bg-black absolute top-2 left-2'>
-                                            X
-                                        </Button>
-                                        
+                                {/* Main chat body */}
+                                <ScrollableChat
+                                    messages={messages}
+                                    scrollHandler={scrollHandler}
+                                    cursorRef={cursorRef} />
 
-                                    </div>
-                                    : <></> 
+                            </>
                             }
-                            <div className='flex md:gap-5 gap-2 items-stretch'>
-                                <Input
-                                    ref={chatInputRef}
-                                    className="flex-1"
-                                    placeholder='Enter a message...'
-                                    onChange={typingHandler}
-                                    value={newMessage}
-                                    onKeyDown= {(e) => e.key === 'Enter' ? sendMessage(): ''}
-                                />
-                                <Input 
-                                    type="file" 
-                                    id='file'
-                                    placeholder="Upload your profile picture"
-                                    className="hidden"
-                                    onChange={(e) => handleImageUpload(e.target.files[0])}
-                                />
-                                <label className='flex justify-center items-center text-2xl' htmlFor='file'><IoCamera/></label>
-                                <Button className='md:w-[5%] w-[15%]' onClick={sendMessage}>  <IoSend /> </Button>
+                            {istyping ? 'typing' : null}
+
+                            <div className="flex flex-col mt-10 md:gap-5 gap-2 items-stretch">
+                                {
+                                    image ?
+                                        <UploadImagePreview image={image} />
+                                        : <></>
+                                }
+                                <ChatFooter
+                                    chatInputRef={chatInputRef}
+                                    typingHandler={typingHandler}
+                                    newMessage={newMessage}
+                                    sendMessage={sendMessage}
+                                    handleImageUpload={handleImageUpload} />
                             </div>
-                            
+
                         </div>
-                        
                     </div>
-                </div>
-            ) : (
-                <div className={`flex flex-col gap-2 items-center justify-center bg-[#E8E8E8] w-full h-full ${(selectedChat ||  showChatList) ? 'hidden': 'w-[100%]' }`}>
-                    <div>
-                        <img src='http://res.cloudinary.com/talhapro321/image/upload/v1707127552/nkxpjiwsujz0rkbe7p1k.png' alt='omg'/>
-                    </div>
-                    <div>
-                        <h2 className='text-4xl font-extrabold'>Welcome to Chatly</h2>
-                    </div>
-                  
-                   <div className='text-center text-lg text-slate-500'>Select a chat to read messages or start a new <br/> conversation. Enjoy chatting</div>
-                   <Button className='md:hidden' onClick={() =>setShowChatList(true)}>Start Chatting</Button>
-                </div>
-            )
+                ) : (
+                    <NonSelectedChat
+                        selectedChat={selectedChat}
+                        showChatList={showChatList}
+                        setShowChatList={setShowChatList} />
+                )
             }
         </>
     )
