@@ -35,6 +35,9 @@ const useChatList = ({fetchAgain, setFetchAgain}) => {
       useEffect(() => {
         setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
         fetchChats();
+
+        window.addEventListener('fetch_chat', fetchChats);
+        return () => window.removeEventListener('fetch_chat', fetchChats);
     
       }, [fetchAgain])
 

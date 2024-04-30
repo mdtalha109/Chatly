@@ -67,7 +67,10 @@ const useHeader = () => {
             };
             
             const { data } = await axios.post(`${BaseConfig.BASE_API_URL}/chat`, { userId }, config);
-            console.log("datadata: ", data)
+            const customEvent = new CustomEvent('fetch_chat', {
+              detail: { message: 'fetch all chat' }
+            });
+            window.dispatchEvent(customEvent);
             setSelectedChat(data.data);
             setLoadingChat(false);
             onClose();
