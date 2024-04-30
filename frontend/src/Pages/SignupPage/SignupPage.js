@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
 import { Spinner } from '@chakra-ui/react'
 import axios from 'axios'
@@ -16,6 +16,8 @@ const SignupPage = () => {
     const [confirmPassword, setconfirmPassword] = useState('')
     const [pic, setPic] = useState('')
     const [loading, setloading] = useState(false)
+
+    const navigate = useNavigate()
     
 
     const postDetails = (pic) => {
@@ -27,7 +29,7 @@ const SignupPage = () => {
                 description: "Please upload your profile pic!",
                 status: 'warning',
                 duration: 5000,
-                isClosable: true,
+                isClosable: true,   
               })
             return;
         }
@@ -104,8 +106,9 @@ const SignupPage = () => {
                 isClosable: true,
             })
 
-            
             localStorage.setItem('suerInfo', JSON.stringify(data))
+            navigate('/')
+            
 
         }catch (err){
             console.log(err.response.data)
