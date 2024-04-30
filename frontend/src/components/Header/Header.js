@@ -25,15 +25,28 @@ const Header = () => {
         accessChat
     } = useHeader()
 
+    const handleKeyDown = (e) => {
+      if (isOpen && e.key === 'Escape') {
+          onClose();
+      }
+  };
 
-  
     return (
-        <div>
+        <header onKeyDown={handleKeyDown}>
             <div className='flex justify-between items-center bg-[#2B3856] w-full p-5' >
-                  <IoSearch className='text-white' onClick={onOpen}/> 
+                  <search 
+                      onClick={onOpen}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { onOpen(); } }}
+                    >
+                    <IoSearch className='text-white cursor-pointer'  tabindex={0} aria-label="Search" id='search_icon'/>
+                  </search>
+                   
              
-              <div className='text-white'>
-                  <MdLogout className=''  onClick={LogoutHandler}/>   
+              <div className='text-white cursor-pointer' tabindex={0} role="button" aria-label="Logout">
+                  <MdLogout 
+                    onClick={LogoutHandler}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { onOpen(); } }}
+                  />   
               </div>
             </div>
 
@@ -50,11 +63,14 @@ const Header = () => {
                               className=' flex-1'
                               value={search}
                               onChange={(e) => setSearch(e.target.value)}
+                              autoFocus
                             />
 
                             <Button
                               className='md:w-[10%] w-[20%]'
                               onClick={handleSearch}
+                              aria-label="Search Button"
+                              tabindex={0}
                              
                             >
                               <IoSearch/>
@@ -80,7 +96,7 @@ const Header = () => {
                 </Modal.Body>
             </Modal>
 
-        </div>
+        </header>
     )
 }
 
