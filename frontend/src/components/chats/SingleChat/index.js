@@ -27,10 +27,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
         typingHandler,
         sendMessage,
         handleImageUpload,
-        scrollHandler,
         istyping,
-        isUserActive,
-        cursorRef
+        isUserActive,  
     } = useSingleChat(fetchAgain, setFetchAgain)
 
 
@@ -61,8 +59,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
                                 {/* Main chat body */}
                                 <ScrollableChat
                                     messages={messages}
-                                    scrollHandler={scrollHandler}
-                                    cursorRef={cursorRef} />
+                                />
 
                             </>
                             }
