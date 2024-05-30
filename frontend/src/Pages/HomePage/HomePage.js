@@ -69,7 +69,7 @@ const HomePage = () => {
             setloading(false)  
             toast({
                 title: 'Sorry!',
-                description: err?.response?.data?.message,
+                description: err?.response?.data?.message || 'Something went wrong, please try again',
                 status: 'warning',
                 duration: 5000,
                 isClosable: true,
