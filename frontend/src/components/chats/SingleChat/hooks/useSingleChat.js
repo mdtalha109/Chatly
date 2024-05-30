@@ -78,21 +78,29 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
         socket.on(socketEvent.MESSAGE_RECIEVED, (newMessageRecieved) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
 
-                setChats(prevChats => prevChats.map((chat) => {
-                    if (chat._id === newMessageRecieved.chat._id) {
-
-                        chat.latestMessage.content = newMessageRecieved.content
-                    }
-                    return chat;
-                }))
+                setChats(prevChats => {
+                   
+                    const updatedChats = prevChats.map(chat => {
+                        if (chat._id === newMessageRecieved.chat._id) {
+                            chat.latestMessage.content = newMessageRecieved.content;
+                            chat.latestMessage.createdAt = newMessageRecieved.createdAt;
+                        }
+                        return chat;
+                    });
+                    
+                    updatedChats.sort((a, b) => new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt));
+            
+                    return updatedChats;
+                });
             }
             else {
                 setMessages((prevMessages) => [...prevMessages, newMessageRecieved]);
-                // setfetchAgain(!fetchAgain)
+                
                 setChats(prevChats => prevChats.map((chat) => {
                     if (chat._id === newMessageRecieved.chat._id) {
 
                         chat.latestMessage.content = newMessageRecieved.content
+                        
                     }
                     return chat;
                 }))
@@ -146,13 +154,15 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
                 chat: {
                     _id: selectedChat._id,
                     users: selectedChat.users
-                }
+                },
+                createdAt: new Date()
             })
 
             setChats(prevChats => prevChats.map((chat) => {
                 if (chat._id === selectedChat._id) {
 
                     chat.latestMessage.content = newMessage
+                    chat.latestMessage.createdAt = new Date();
                 }
                 return chat;
             }))
