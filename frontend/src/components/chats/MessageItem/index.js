@@ -4,8 +4,7 @@ import { isLastMessage, isSameSender, isSameSenderMargin, isSameUser } from '../
 const MessageItem = ({ messages, message, index, user, scrollRef }) => {
     return (
         <div className='flex items-center ' key={index} ref={scrollRef}>
-            {(isSameSender({ messages }, message, index, user._id) ||
-                isLastMessage(messages, index, user._id)) && (
+            {(isSameSender(messages, message, index, user._id) || isLastMessage(messages, index, user._id)) && (
                     <img
                         src={message.sender.pic}
                         alt='pic'
@@ -22,7 +21,7 @@ const MessageItem = ({ messages, message, index, user, scrollRef }) => {
                     marginLeft: isSameSenderMargin(messages, message, index, user._id),
                     marginTop: isSameUser(messages, message, index, user._id) ? 3 : 10,
                     borderRadius: "5px",
-                    padding: "5px 15px",
+                    padding: "7px 20px",
                     maxWidth: "75%",
                 }}
             >
