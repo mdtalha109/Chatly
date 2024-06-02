@@ -33,7 +33,7 @@ const ChatListItem = ({chat, setSelectedChat, loggedUser, selectedChat}) => {
         )}
       </div>
     </section>
-    <span className='text-xs'>{formatDateTime(moment(chat?.latestMessage?.createdAt).format('YYYY-MM-DD HH:mm:ss'))}</span>
+    <span className='text-xs'>{formatDateTime(moment(chat?.latestMessage?.createdAt))}</span>
   </div>
   )
 }
