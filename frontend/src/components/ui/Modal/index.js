@@ -23,7 +23,7 @@ function Modal({ children, isOpen, onClose, width, closeOverlay = false, variant
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed top-0 left-0 z-9999999 w-full h-full flex items-center justify-center bg-gray-950 backdrop-blur-[2px] bg-opacity-60  "
+        className="fixed top-0 left-0 z-[1000] w-full h-full flex items-center justify-center bg-gray-950 backdrop-blur-[2px] bg-opacity-60  "
         onClick={closeOverlay}
       >
         <motion.div
@@ -31,7 +31,7 @@ function Modal({ children, isOpen, onClose, width, closeOverlay = false, variant
           animate={{ opacity: 1,scale:1 }}
           exit={{ opacity: 0, scale: 0.1 }}
           transition={{ duration: 0.5}}
-          className={clsx(`bg-white z-999999 max-w-[90vw] max-h-[90vh] overflow-auto  flex flex-col rounded-2xl ${width}  `,
+          className={clsx(`bg-white z-[1001] max-w-[90vw] max-h-[90vh] overflow-auto  flex flex-col rounded-2xl ${width}  `,
             variants[variant])}
           onClick={(e) => e.stopPropagation()}
         >
@@ -46,11 +46,11 @@ function Modal({ children, isOpen, onClose, width, closeOverlay = false, variant
 }
 
 Modal.Header = function Header({ className, children }) {
-  return <div className='text-lg flex gap-2 z-9999999 md:p-4 rounded-t-2xl p-2 '>{children }</div>
+  return <div className='text-lg flex gap-2 z-[1002] md:p-4 rounded-t-2xl p-2 '>{children }</div>
 };
 
 Modal.Body = function Body({ children }) {
-  return <div className="md:p-4 p-2 relative z-9999999 grow overflow-auto ">{children}</div>;
+  return <div className="md:p-4 p-2 relative z-[1002] grow overflow-auto ">{children}</div>;
 };
 
 Modal.Footer = function Footer({ children }) {
