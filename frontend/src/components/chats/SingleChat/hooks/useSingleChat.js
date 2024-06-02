@@ -77,29 +77,45 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
     useEffect(() => {
         socket.on(socketEvent.MESSAGE_RECIEVED, (newMessageRecieved) => {
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
-
                 setChats(prevChats => {
-                   
-                    const updatedChats = prevChats.map(chat => {
-                        if (chat._id === newMessageRecieved.chat._id) {
-                            chat.latestMessage.content = newMessageRecieved.content;
-                            chat.latestMessage.createdAt = newMessageRecieved.createdAt;
-                        }
-                        return chat;
-                    });
-                    
-                    updatedChats.sort((a, b) => new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt));
-            
-                    return updatedChats;
+                    let chatUpdated = false;
+                        const updatedChats = prevChats.map(chat => {
+                            if (chat._id === newMessageRecieved.chat._id) {
+                                chat.latestMessage.content = newMessageRecieved.content;
+                                chat.latestMessage.createdAt = newMessageRecieved.createdAt;
+
+                                chatUpdated = true;
+                            }  
+                            return chat;
+                        });
+                        
+                        if(chatUpdated){
+                            updatedChats.sort((a, b) => new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt));
+                            return updatedChats;
+                        } else {
+                            let chat = {};
+                            chat._id= newMessageRecieved.chat._id
+                            chat.users =  newMessageRecieved.chat.users;
+                            chat.latestMessage = {     
+                                content: newMessageRecieved.content,
+                                sender: {
+                                    name: newMessageRecieved.sender.name,
+                                    email: newMessageRecieved.sender.email,
+                                }
+                            }
+                            return [chat, ...prevChats]
+                        } 
                 });
             }
             else {
+                
                 setMessages((prevMessages) => [...prevMessages, newMessageRecieved]);
                 
                 setChats(prevChats => prevChats.map((chat) => {
                     if (chat._id === newMessageRecieved.chat._id) {
 
                         chat.latestMessage.content = newMessageRecieved.content
+                        chat.latestMessage.createdAt = newMessageRecieved.createdAt;
                         
                     }
                     return chat;
@@ -148,6 +164,9 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
             socket.emit(socketEvent.NEW_MESSAGE, {
                 sender: {
                     _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    pic: user.pic
                 },
                 content: newMessage,
                 image: image,
@@ -160,7 +179,13 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
 
             setChats(prevChats => prevChats.map((chat) => {
                 if (chat._id === selectedChat._id) {
-
+                    if(!chat.latestMessage){
+                        chat.latestMessage = {};
+                        chat.latestMessage.sender = {
+                            name: user.name,
+                            email: user.email
+                        }
+                    }
                     chat.latestMessage.content = newMessage
                     chat.latestMessage.createdAt = new Date();
                 }
@@ -242,11 +267,9 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
         let lastTypingTime = new Date().getTime();
         const timerLength = 3000;
 
-        console.log("timeoutIdRef.current: ", timeoutIdRef.current)
 
         if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
         timeoutIdRef.current = setTimeout(() => {
-            console.log()
             socket.emit(socketEvent.STOP_TYPING, selectedChat._id);
             setTyping(false);
         }, 1000);
