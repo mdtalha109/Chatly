@@ -19,7 +19,9 @@ const messageModel = mongoose.Schema({
     chat : {
         type : mongoose.Schema.Types.ObjectId,
         ref  : "Chat"
-    } 
+    },
+    createdAt: { type: Date, default: Date.now }
+
 }, {
     timeStamps: true
 })
