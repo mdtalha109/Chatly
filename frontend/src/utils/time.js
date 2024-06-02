@@ -13,6 +13,7 @@ export const formatDateTime = (dateTime) => {
     }
     
     // If neither today nor yesterday, return the full formatted date time
-    return inputDateTime.format('YYYY-MM-DD HH:mm:ss');
+    console.log("inputDateTime.format('YYYY-MM-DD HH:mm:ss'): ", inputDateTime.format('YYYY/MM/DD'))
+    return inputDateTime.format('YYYY/MM/DD');
   };
 
