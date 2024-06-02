@@ -9,10 +9,10 @@ const ChatListItem = ({chat, setSelectedChat, loggedUser, selectedChat}) => {
     onKeyPress={() => setSelectedChat(chat)}
     onClick={() => setSelectedChat(chat)}
     key={chat._id}
-    tabindex={0}
+    tabIndex={0}
   >
     <section className='flex gap-4'>
-      <img class="h-10 w-10 rounded-full object-cover" src={getSender(loggedUser, chat.users)?.pic} alt={getSender(loggedUser, chat.users)?.name} />
+      <img className="h-10 w-10 rounded-full object-cover" src={getSender(loggedUser, chat.users)?.pic} alt={getSender(loggedUser, chat.users)?.name} />
 
       <div className='flex flex-col gap-2'>
         <p className='font-bold'>
