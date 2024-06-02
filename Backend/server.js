@@ -66,12 +66,34 @@ const io = require("socket.io")(server, {
     },
   });
 
+  
+
+  let usersMap = {};
+
+
+  const getUserIdFromSocketId = (socketId) => {
+    for (const [key, value] of Object.entries(usersMap)) {
+      if(value == socketId) return key
+    }
+  }
+
   io.on("connection", (socket) => {
         socket.on(socketEvent.SETUP, (userData) => {
             
             socket.join(userData._id);
+            usersMap[userData._id] = socket.id
+            console.log("usersMap: ", usersMap)
             socket.emit(socketEvent.CONNECTED);
+
+            socket.in(Object.keys(usersMap)).emit(socketEvent.UPDATE_USER_STATUS, Object.keys(usersMap));
+            
         });
+
+
+        socket.on(socketEvent.GET_USER_STATUS, (userData) => {
+          console.log("userData: ", userData)
+          socket.emit(socketEvent.UPDATE_USER_STATUS, Object.keys(usersMap));
+        })
 
         socket.on(socketEvent.JOIN_CHAT, (room) => {
             socket.join(room)
@@ -79,6 +101,9 @@ const io = require("socket.io")(server, {
 
         socket.on(socketEvent.NEW_MESSAGE, (newMessageRecieved) => {
             var chat = newMessageRecieved.chat;
+
+            console.log("newMessageRecieved: ", newMessageRecieved)
+            console.log("chat.users: ", chat.users)
         
             if (!chat.users) return
         
@@ -97,8 +122,13 @@ const io = require("socket.io")(server, {
           socket.in(roomId).emit(socketEvent.STOP_TYPING)
         })
 
-        socket.off(socketEvent.SETUP, () => {
-          socket.leave(userData._id);
+        socket.on('disconnect', () => {
+
+          const userId = getUserIdFromSocketId(socket.id)
+         
+          delete usersMap[userId];
+          socket.in(Object.keys(usersMap)).emit(socketEvent.UPDATE_USER_STATUS, Object.keys(usersMap));
+          socket.leave(userId);
         });
   });
 
