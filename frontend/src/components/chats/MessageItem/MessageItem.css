@@ -1,58 +1,58 @@
-
 .right-bubble {
-    position: relative;
-  }
-  
-  .right-bubble:before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    top: 0;
-    right: -8px;
-    height: 20px;
-    width: 20px;
-    background: #0EA487;
-    background-attachment: fixed;
-    border-bottom-right-radius: 15px;
-  }
-  
-  .right-bubble:after {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    right: -10px;
-    width: 10px;
-    height: 20px;
-    background: #e8e8e9;
-    border-top-left-radius: 10px;
-  }
+  position: relative;
+}
 
-  .left-bubble {
-    position: relative;
-  }
-  
-  .left-bubble:before {
-    content: "";
-    position: absolute;
-    z-index: 0;
-    top: 0;
-    left: -8px;
-    height: 20px;
-    width: 20px;
-    background: #2B3856;
-    background-attachment: fixed;
-    border-bottom-left-radius: 15px;
-  }
-  
-  .left-bubble:after {
-    content: "";
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: -10px;
-    width: 10px;
-    height: 20px;
-    background: #E8E8E8;
-    border-top-right-radius: 10px;
-  }
+.right-bubble:before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  right: -8px;
+  height: 20px;
+  width: 20px;
+  background: #0EA487;
+  background-attachment: fixed;
+  border-bottom-right-radius: 15px;
+}
+
+.right-bubble:after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: -10px;
+  width: 10px;
+  height: 20px;
+  background: #e8e8e9;
+  border-top-left-radius: 10px;
+}
+
+.left-bubble {
+  position: relative;
+  z-index: 1;
+}
+
+.left-bubble:before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: -8px;
+  height: 20px;
+  width: 20px;
+  background: #2B3856;
+  background-attachment: fixed;
+  border-bottom-left-radius: 15px;
+}
+
+.left-bubble:after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: -10px;
+  width: 10px;
+  height: 20px;
+  background: #E8E8E8;
+  border-top-right-radius: 10px;
+}
