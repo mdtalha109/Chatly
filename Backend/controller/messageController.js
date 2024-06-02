@@ -7,14 +7,21 @@ const asyncHandler = require("../utils/asyncHandler");
 
 
 const allMessages = asyncHandler(async (req, res) => {
-  try {
-    const messages = await Message.find({ chat: req.params.chatId })
+  try { 
+
+    let messages = await Message.find({ chat: req.params.chatId })
       .populate("sender", "name pic email")
-      .populate("chat");
-      
+      .populate("chat")
+      .sort({ createdAt:-1 })
+      messages = messages.sort((a,b) => a.createdAt - b.createdAt)
+
     res.status(200).json(new ApiResponse(200, "Messages fetched successfully", messages, true));
+
   } catch (error) {
+
+    console.log("error: ", error)
     throw new ApiError(400, "Something went wrong while fetching messages");
+    
   }
 });
 
