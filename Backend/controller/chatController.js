@@ -52,6 +52,7 @@ const accessChat = asyncHandler(async (req, res) => {
     }
   }
 });
+
 //@description     Fetch all chats for a user
 //@route           GET /api/chat/
 //@access          Protected
@@ -61,8 +62,13 @@ const fetchChats = asyncHandler(async (req, res) => {
       .populate("users", "-password")
       .populate("groupAdmin", "-password")
       .populate("latestMessage")
-      .sort({ updatedAt: -1 })
       .then(async (results) => {
+        results = results.sort((a, b) => {
+          const first_date = new Date(a.latestMessage?.createdAt);
+          const second_date = new Date(b.latestMessage?.createdAt);
+          return second_date - first_date;
+        });
+       
         results = await User.populate(results, {
           path: "latestMessage.sender",
           select: "name pic email",
