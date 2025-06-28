@@ -1,51 +1,108 @@
-import React from 'react'
-import moment from 'moment'
-import { isLastMessage, isSameSender, isSameSenderMargin, isSameUser } from '../../../config/chatLogics'
-import { formatDateTime } from '../../../utils/time'
-import './MessageItem.css'
+import React, { memo } from 'react';
+import { 
+  isLastMessage, 
+  isSameSender, 
+  isSameSenderMargin, 
+  isSameUser 
+} from '../../../config/chatLogics';
+import MessageAvatar from './MessageAvatar';
+import MessageTimestamp from './MessageTimestamp';
+import MessageText from './MessageText';
+import MessageImage from './MessageImage';
 
 
-const MessageItem = ({ messages, message, index, user, scrollRef }) => {
-    return (
-        <div className='flex items-center gap-2' key={index} ref={scrollRef}>
-            {(isSameSender(messages, message, index, user._id) || isLastMessage(messages, index, user._id)) && (
-                <img
-                    src={message.sender.pic}
-                    alt='pic'
-                    className='rounded-full h-8 w-8'
-                />
-            )}
+const useMessageLayout = (messages, message, index, userId) => {
+  return {
+    isCurrentUser: message.sender?._id === userId,
+    shouldShowAvatar: isSameSender(messages, message, index, userId) || 
+                     isLastMessage(messages, index, userId),
+    marginLeft: isSameSenderMargin(messages, message, index, userId),
+    marginTop: isSameUser(messages, message, index, userId) ? 5 : 10,
+  };
+};
 
-            <div
-                className={`${message.sender._id === user._id ? "right-bubble" : "left-bubble"}`}
-                style={{
-                    
-                    backgroundColor: `${message.sender._id === user._id ? "#0EA487" : "#2B3856"}`,
-                    color: "white",
-                    marginLeft: isSameSenderMargin(messages, message, index, user._id),
-                    marginTop: isSameUser(messages, message, index, user._id) ? 5 : 10,
-                    marginRight: "10px",
-                    borderRadius: "5px",
-                    padding: "7px 20px",
-                    paddingRight: "70px",
-                    maxWidth: "75%",
-                    // position: "relative",
-                    
-                }}
-            >
-                <div>
-                    {message.image ? (
-                        <img src={message.image} alt={message.image} className='h-[450px] object-contain w-max' />
-                    ) : (
-                        <span>{message.content}</span>
-                    )}
-                    <div style={{ fontSize: '0.8em', color: '#e0e0e0', position: 'absolute', right: '5px', bottom: "2px" }}>
-                        {formatDateTime(moment(message.createdAt))}
-                    </div>
-                </div>
-            </div>
+const useMessageStyles = (isCurrentUser, marginLeft, marginTop) => {
+  return {
+    container: `
+      relative max-w-[75%] rounded-md border border-gray-200 p-2 pr-16
+      ${isCurrentUser 
+        ? 'bg-blue-500 text-white' 
+        : 'bg-white text-black'
+      }
+    `,
+    spacing: {
+      marginLeft,
+      marginTop,
+      marginRight: 10,
+    }
+  };
+};
+
+const MessageItem = memo(({ 
+  messages, 
+  message, 
+  index, 
+  user, 
+  scrollRef,
+  className = '',
+  ...props 
+}) => {
+
+  const { 
+    isCurrentUser, 
+    shouldShowAvatar, 
+    marginLeft, 
+    marginTop 
+  } = useMessageLayout(messages, message, index, user._id);
+
+  
+  const { container, spacing } = useMessageStyles(isCurrentUser, marginLeft, marginTop);
+
+  if (!message || !user) {
+    console.warn('MessageItem: Missing required props');
+    return null;
+  }
+
+  return (
+    <div 
+      className={`flex items-end gap-2 ${className}`}
+      ref={scrollRef}
+      role="listitem"
+      aria-label={`Message from ${message.sender?.name || 'Unknown user'}`}
+      {...props}
+    >
+      <MessageAvatar
+        sender={message.sender} 
+        shouldShow={shouldShowAvatar} 
+      />
+
+      <div 
+        className={container}
+        style={spacing}
+        role="article"
+        aria-labelledby={`message-${index}`}
+      >
+        <div id={`message-${index}`}>
+          {message.image ? (
+            <MessageImage
+              src={message.image} 
+              senderName={message.sender?.name} 
+            />
+          ) : (
+            <MessageText content={message.content} />
+          )}
+
+          <MessageTimestamp 
+            createdAt={message.createdAt} 
+            isCurrentUser={isCurrentUser} 
+          />
         </div>
-    )
-}
+      </div>
+    </div>
+  );
+});
 
-export default MessageItem
+MessageItem.displayName = 'MessageItem';
+
+
+export default MessageItem;
