@@ -1,22 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { IoIosArrowBack } from 'react-icons/io'
-import { getSender } from '../../../config/chatLogics'
+import React from 'react';
+import { IoIosArrowBack } from 'react-icons/io';
+import { getSender } from '../../../config/chatLogics';
+import UserAvatar from './UserAvatar';
+import OnlineStatus from './OnlineStatus';
 
 const ChatHeader = ({ setSelectedChat, user, selectedChat, isUserActive }) => {
-    return (
-        <div className='flex px-2 py-4 items-center justify-between'>
+  const sender = getSender(user, selectedChat?.users);
 
-            <seaction className='flex items-center gap-2'>
-                <div className='cursor-pointer'>
-                    <IoIosArrowBack onClick={() => setSelectedChat("")} />
-                </div>
-                <div className='flex flex-col '>
-                    <div className={`font-bold ${isUserActive ? 'text-sm' : ''}  `}>{getSender(user, selectedChat.users).name}</div>
-                    {isUserActive ? <div className='text-green-500 text-xs duration-1000'>Online</div> : ''}
-                </div>
-            </seaction>
+  return (
+    <div className="flex items-center px-2 py-4" data-testid="chat-header">
+      <section className="flex items-center gap-2 w-full">
+        <button
+          className="cursor-pointer"
+          onClick={() => setSelectedChat("")}
+          data-testid="back-button"
+        >
+          <IoIosArrowBack size={20} />
+        </button>
+
+        <div className="flex items-center gap-4">
+          <UserAvatar src={sender.pic} alt={sender.name} />
+
+          <div className="flex flex-col">
+            <div className="font-medium text-base" data-testid="user-name">
+              {sender.name}
+            </div>
+            <OnlineStatus isActive={isUserActive} />
+          </div>
         </div>
-    )
-}
+      </section>
+    </div>
+  );
+};
 
-export default ChatHeader
+
+export default ChatHeader;
