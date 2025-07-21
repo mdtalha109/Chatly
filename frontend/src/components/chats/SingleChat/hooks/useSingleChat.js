@@ -1,81 +1,67 @@
-
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import axios from 'axios';
-import { io } from "socket.io-client";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ChatState } from '../../../../Context/chatProvider';
 import { getSender } from '../../../../config/chatLogics';
 import { BaseConfig } from '../../../../config/baseConfig';
 import { socketEvent } from '../../../../constant/socket';
+import useSocket from '../../../../hooks/useSocket';
+import { messageService } from '../../../../services/messageService';
 
-
-const ENDPOINT = BaseConfig.BASE_SERVER_URL
 var socket, selectedChatCompare;
 
-const useSingleChat = (fetchAgain, setfetchAgain) => {
-    const [messages, setMessages] = useState([])
-    const [loading, setLoading] = useState(false)
-    const [newMessage, setNewMessage] = useState()
-    const [image, setImage] = useState(null)
-    const { user, chats, setChats, selectedChat, setSelectedChat } = ChatState()
-    const [socketConnected, setSocketConnected] = useState(false)
+const useSingleChat = () => {
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [newMessage, setNewMessage] = useState();
+    const [image, setImage] = useState(null);
+    const { user, chats, setChats, selectedChat, setSelectedChat } = ChatState();
     const [typing, setTyping] = useState(false);
     const [istyping, setIsTyping] = useState(false);
-    const [isUserActive, setUserisActive] = useState(false)
+    const [isUserActive, setUserisActive] = useState(false);
 
-    const chatInputRef = useRef(null)
+    const chatInputRef = useRef(null);
+    const timeoutIdRef = useRef(null);
 
+    // Use the shared socket hook
+    const { socket, socketConnected, userStatuses } = useSocket();
 
-
+    // Handle typing events
     useEffect(() => {
+        if (!socket) return;
 
-        socket = io(ENDPOINT);
-        socket.emit(socketEvent.SETUP, user)
-        socket.on(socketEvent.CONNECTED, () => {
-            setSocketConnected(true);
+        const handleTyping = () => setIsTyping(true);
+        const handleStopTyping = () => setIsTyping(false);
 
-        })
-        socket.on(socketEvent.TYPING, () => setIsTyping(true));
-        socket.on(socketEvent.STOP_TYPING, () => setIsTyping(false));
+        socket.on(socketEvent.TYPING, handleTyping);
+        socket.on(socketEvent.STOP_TYPING, handleStopTyping);
 
         return () => {
-            socket.off(socketEvent.CONNECTED, () => {
-                setSocketConnected(true);
+            socket.off(socketEvent.TYPING, handleTyping);
+            socket.off(socketEvent.STOP_TYPING, handleStopTyping);
+        };
+    }, [socket]);
 
-            })
-            socket.off(socketEvent.TYPING, () => setIsTyping(true));
-            socket.off(socketEvent.STOP_TYPING, () => setIsTyping(false));
-
-            socket.disconnect()
+    // Handle user status updates
+    useEffect(() => {
+        if (selectedChat && userStatuses.length > 0) {
+            let sender = getSender(user, selectedChat.users)._id;
+            setUserisActive(userStatuses.includes(sender));
         }
+    }, [selectedChat, user, userStatuses]);
 
-    }, [])
-
+    // Handle chat selection
     useEffect(() => {
+        setMessages([]);
+        fetchMessages();
+        chatInputRef.current && chatInputRef.current.focus();
+        selectedChatCompare = selectedChat;
+    }, [selectedChat]);
 
-        socket.emit(socketEvent.GET_USER_STATUS, user)
-        socket.on(socketEvent.UPDATE_USER_STATUS, (data) => {
-            if (selectedChat) {
-                let sender = getSender(user, selectedChat.users)._id;
-                if (data.includes(sender)) {
-                    setUserisActive(true)
-                } else setUserisActive(false)
-            }
-
-        })
-    }, [selectedChat, user])
-
+    // Handle incoming messages
     useEffect(() => {
-        setMessages([])
-
-        fetchMessages()
-        chatInputRef.current && chatInputRef.current.focus()
-
-        selectedChatCompare = selectedChat
-    }, [selectedChat])
-
-    useEffect(() => {
+        if(!socket) return
         socket.on(socketEvent.MESSAGE_RECIEVED, (newMessageRecieved) => {
+            console.log("MESSAGE_RECIEVED: ")
             if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
                 setChats(prevChats => {
                     let chatUpdated = false;
@@ -133,34 +119,27 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
         })
 
 
-    }, [])
-
+    }, [socket])
 
     const fetchMessages = async () => {
-        if (!selectedChat)
-            return;
+        if (!selectedChat) return;
 
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            }
+            const data  = await messageService.fetchMessage(selectedChat._id, user.token);
 
-            const { data } = await axios.get(`${BaseConfig.BASE_API_URL}/message/${selectedChat._id}`, config)
-
-            setMessages((prev) => [...data.data, ...prev]);
+            setMessages((prev) => [...data, ...prev]);
             setLoading(false);
-            socket.emit(socketEvent.JOIN_CHAT, selectedChat._id);
-
+            
+            if (socket) {
+                socket.emit(socketEvent.JOIN_CHAT, selectedChat._id);
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
         }
-        catch (error) {
-
-        }
-    }
+    };
 
     const sendMessage = async (e) => {
-        if (newMessage || image) {
+        if ((newMessage || image) && socket) {
             socket.emit(socketEvent.NEW_MESSAGE, {
                 sender: {
                     _id: user._id,
@@ -175,22 +154,22 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
                     users: selectedChat.users
                 },
                 createdAt: new Date()
-            })
+            });
 
             setChats(prevChats => prevChats.map((chat) => {
                 if (chat._id === selectedChat._id) {
-                    if(!chat.latestMessage){
+                    if (!chat.latestMessage) {
                         chat.latestMessage = {};
                         chat.latestMessage.sender = {
                             name: user.name,
                             email: user.email
-                        }
+                        };
                     }
-                    chat.latestMessage.content = newMessage
+                    chat.latestMessage.content = newMessage;
                     chat.latestMessage.createdAt = new Date();
                 }
                 return chat;
-            }))
+            }));
 
             setMessages((prevMessages) => [...prevMessages, {
                 sender: {
@@ -200,80 +179,57 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
                 image: image,
                 chat: {
                     users: selectedChat.users
-                }
-
+                },
+                createdAt: new Date()
             }]);
 
             try {
-                const config = {
-                    headers: {
-                        "content-Type": "application/json",
-                        Authorization: `Bearer ${user.token}`
-                    }
-                }
                 setNewMessage('');
-                setImage(null)
-                const { data } = await axios.post(`${BaseConfig.BASE_API_URL}/message`, {
-                    content: newMessage,
-                    image: image,
-                    chatId: selectedChat._id
-                }, config)
+                setImage(null);
 
-            }
-            catch (error) {
-
+                await messageService.sendMessage(selectedChat._id, newMessage, image, user.token);
+            } catch (error) {
+                console.error('Error sending message:', error);
             }
         }
-    }
-
+    };
 
     const handleImageUpload = async (image) => {
-
         if (image.type === "Image/jpeg" || image.type === "Image/png" || image.type === "image/png") {
-            const data = new FormData()
-            data.append("file", image)
-            data.append("upload_preset", "chatly")
-            data.append("cloud_name", "talhapro321")
-            fetch("https://api.cloudinary.com/v1_1/talhapro321/image/upload", {
-                method: "POST",
-                body: data
-            }).then((res) => res.json())
-                .then(data => {
-
-                    setImage(data.url.toString())
-
-                })
-                .catch((err) => {
-                    console.log(err)
-
-                })
-        } else {
-
+            const data = new FormData();
+            data.append("file", image);
+            data.append("upload_preset", "chatly");
+            data.append("cloud_name", "talhapro321");
+            
+            try {
+                const response = await fetch("https://api.cloudinary.com/v1_1/talhapro321/image/upload", {
+                    method: "POST",
+                    body: data
+                });
+                const result = await response.json();
+                setImage(result.url.toString());
+            } catch (err) {
+                console.error('Error uploading image:', err);
+            }
         }
-    }
-
-    const timeoutIdRef = useRef(null); // Declare a ref to hold the timeoutId
+    };
 
     const typingHandler = useCallback((e) => {
-        setNewMessage(e.target.value)
+        setNewMessage(e.target.value);
 
-        //if (!socketConnected) return;
+        if (!socket || !socketConnected) return;
 
         if (!typing) {
             setTyping(true);
             socket.emit(socketEvent.TYPING, selectedChat._id);
         }
 
-        let lastTypingTime = new Date().getTime();
-        const timerLength = 3000;
-
-
         if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
         timeoutIdRef.current = setTimeout(() => {
             socket.emit(socketEvent.STOP_TYPING, selectedChat._id);
             setTyping(false);
         }, 1000);
-    }, [typing]);
+    }, [typing, socket, socketConnected, selectedChat]);
 
     return {
         selectedChat,
@@ -289,8 +245,9 @@ const useSingleChat = (fetchAgain, setfetchAgain) => {
         handleImageUpload,
         istyping,
         isUserActive,
+        socketConnected,
+        userStatuses
+    };
+};
 
-    }
-}
-
-export default useSingleChat
+export default useSingleChat;

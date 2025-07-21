@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ChatState } from "../Context/chatProvider";
 
 import ChatBox from '../components/chats/ChatBox'
 import ChatList from "../components/chats/ChatList/index";
-import Header from "../components/Header/Header";
-import { SocketProvider } from "../Context/SocketProvider";
 import { Settings } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import ChatLayout from "../components/layout/ChatLayout";

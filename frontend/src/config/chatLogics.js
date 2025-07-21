@@ -1,5 +1,6 @@
 export const getSender = (loggedUser, users) => {
-  console.log('users: ', users)
+  console.log("loggedUser in getSender: ",loggedUser)
+  console.log('users in getSender: ', users)
     if(users && loggedUser){
         return users[0]._id === loggedUser._id ? users[1] : users[0]
     }
@@ -32,7 +33,7 @@ export const isLastMessage = (messages, i, userId) => {
       messages[i + 1].sender._id === m.sender._id &&
       messages[i].sender._id !== userId
     )
-      return 40;
+      return 7;
     else if (
       (i < messages.length - 1 &&
         messages[i + 1].sender._id !== m.sender._id &&

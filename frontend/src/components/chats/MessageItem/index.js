@@ -71,10 +71,10 @@ const MessageItem = memo(({
       aria-label={`Message from ${message.sender?.name || 'Unknown user'}`}
       {...props}
     >
-      <MessageAvatar
+      {/* <MessageAvatar
         sender={message.sender} 
         shouldShow={shouldShowAvatar} 
-      />
+      /> */}
 
       <div 
         className={container}

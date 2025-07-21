@@ -6,6 +6,8 @@ const MessageTimestamp = memo(({ createdAt, isCurrentUser }) => {
   if (!createdAt) return null;
 
   const timeString = formatDateTime(moment(createdAt));
+
+  console.log("timeString: ", timeString)
   
   return (
     <time 

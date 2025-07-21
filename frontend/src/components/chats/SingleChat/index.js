@@ -13,7 +13,7 @@ import UploadImagePreview from '../UploadImagePreview';
 
 
 
-const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }) => {
+const SingleChat = ({ setShowChatList, showChatList }) => {
     const { user } = ChatState()
 
     const {
@@ -29,7 +29,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
         handleImageUpload,
         istyping,
         isUserActive,  
-    } = useSingleChat(fetchAgain, setFetchAgain)
+    } = useSingleChat()
 
 
     return (
@@ -45,7 +45,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain, setShowChatList, showChatList }
                             isUserActive={isUserActive}
                         />
 
-                        <div className="flex flex-col p-2 justify-end w-full bg-[#E8E8E8] items-stretch flex-1  overflow-y-scroll">
+                        <div className="flex flex-col p-2 justify-end w-full bg-[#f8f9fa] items-stretch flex-1  overflow-y-scroll">
                             {loading ? (
                                 <Spinner
                                     size="xl"
