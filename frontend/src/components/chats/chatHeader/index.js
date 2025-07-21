@@ -8,7 +8,7 @@ const ChatHeader = ({ setSelectedChat, user, selectedChat, isUserActive }) => {
   const sender = getSender(user, selectedChat?.users);
 
   return (
-    <div className="flex items-center px-2 py-4" data-testid="chat-header">
+    <div className="flex items-center px-2 py-4 h-16 border-b-[1px] border-b-gray" data-testid="chat-header">
       <section className="flex items-center gap-2 w-full">
         <button
           className="cursor-pointer"

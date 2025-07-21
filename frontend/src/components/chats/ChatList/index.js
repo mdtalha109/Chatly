@@ -21,7 +21,6 @@ const ChatList = () => {
 
   const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('');
-
   const filteredChats = chats?.filter((chat) =>
     chat.chatName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     chat.users?.some(user => user.name?.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -38,8 +37,6 @@ const ChatList = () => {
     setIsUserSearchModalOpen(false);
     userSearchHook.reset();
   };
-
-
 
   return (
     <>

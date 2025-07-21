@@ -5,41 +5,39 @@ import { ChatState } from "../Context/chatProvider";
 import ChatBox from '../components/chats/ChatBox'
 import ChatList from "../components/chats/ChatList/index";
 import Header from "../components/Header/Header";
+import { SocketProvider } from "../Context/SocketProvider";
+import { Settings } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
+import ChatLayout from "../components/layout/ChatLayout";
 
 
 const ChatPage = () => {
 
-    
-    const navigate = useNavigate()
-    const [fetchAgain, setfetchAgain] = useState(false);
     const [showChatList, setShowChatList] = useState(false)
-
-
     const { selectedChat, user } = ChatState();
 
-    useEffect(() => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        if (!userInfo) navigate('/')
-    }, [navigate]);
+    useAuth();
 
     return (
         <>
-            {user && <Header />}
-            {user &&
-                <div>
-                    <div className="flex w-full h-[90vh]" >
-                        <div className={`flex md:w-[30%] ${(showChatList) ? 'w-[100%] md:w-[30%]': 'md:block hidden' } ${selectedChat ? 'md:block hidden' : ''}  `}>
-                            <ChatList fetchAgain={fetchAgain} />
-
+             <ChatLayout user={user}>
+                <div className={`flex md:w-[25%] ${(showChatList) ? 'w-[100%] md:w-[30%]' : 'md:block hidden'} ${selectedChat ? 'md:block hidden' : ''}  `}>
+                    <div className="h-16 flex justify-between items-center px-6 border-b-[1px] border-b-gray border-r-[1px] border-r-gray">
+                        <div className="text-2xl">
+                            Chatly
                         </div>
 
-                        <div className={`flex flex-1 md:max-w-[70%] overflow-y-hidden  bg-blue-700  ${(selectedChat ) ? 'md:block block' : ''}` } >
-                            <ChatBox fetchAgain={fetchAgain} setfetchAgain={setfetchAgain}  setShowChatList={setShowChatList} showChatList={showChatList}/>
+                        <div className="flex gap-2">
+                            <Settings />
                         </div>
                     </div>
+                    <ChatList />
                 </div>
-            }
 
+                <div className={`flex flex-1 md:max-w-[75%] overflow-y-hidden  bg-blue-700  ${(selectedChat) ? 'md:block block' : ''}`} >
+                    <ChatBox setShowChatList={setShowChatList} showChatList={showChatList} />
+                </div>
+            </ChatLayout>
         </>
 
     )
