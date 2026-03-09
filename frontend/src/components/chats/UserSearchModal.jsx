@@ -1,8 +1,10 @@
 import React from 'react';
 import { Modal, Button, Input } from '../ui';
-import { Search } from 'lucide-react';
+import { CrossIcon, Search, SearchAlert, X } from 'lucide-react';
 import { IoCloseCircle } from 'react-icons/io5';
 import UserListItem from './UserListItem';
+import { CloseIcon } from '@chakra-ui/icons';
+import { BiCloset } from 'react-icons/bi';
 
 
 
@@ -84,16 +86,16 @@ const UserSearchModal = ({ isOpen, onClose, userSearchHook }) => {
       width="w-full max-w-lg"
     >
       <Modal.Header>
-        <div className="flex items-center justify-between">
-          <span>Search Users</span>
-          <Button
-            variant="ghost"
+        <div className="flex w-full items-center justify-between">
+          <div>Search Users</div>
+          <button
+            
             onClick={onClose}
             className="p-1 ml-auto"
             aria-label="Close search"
           >
-            <IoCloseCircle className="w-5 h-5" />
-          </Button>
+            <X  className="w-5 h-5" />
+          </button>
         </div>
       </Modal.Header>
 
