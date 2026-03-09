@@ -18,15 +18,12 @@ const ChatContent = ({ chat, senderName, loggedUser, isSelected }) => {
         </h3>
       </div>
 
-      {latestMsg && (
-        <div className="flex items-center justify-between">
-          <p className={`text-sm truncate text-gray-500`}>
-            <span className="font-medium">
-              {latestMsg.sender.name === loggedUser.name ? 'You' : latestMsg.sender.name}:
-            </span>
-            <span className="ml-1">{getTrimmedMessage(latestMsg.content)}</span>
+
+
+      {latestMsg && latestMsg?.sender?.name == loggedUser?.name &&(
+          <p className={`text-xs truncate text-gray-500`}>
+            <span className="">{getTrimmedMessage(latestMsg?.content)}</span>
           </p>
-        </div>
       )}
     </>
   );

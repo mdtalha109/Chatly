@@ -3,7 +3,7 @@ import { DropDown } from "../../ui";
 
 const STYLES = {
   header: {
-    container: "h-16 flex justify-between items-center px-6 border-b-[1px] border-b-gray border-r-[1px] border-r-gray",
+    container: "h-16 flex justify-between items-center px-6 border-b-[1px] border-b-gray",
     title: "text-2xl",
     actions: "flex gap-2"
   },
