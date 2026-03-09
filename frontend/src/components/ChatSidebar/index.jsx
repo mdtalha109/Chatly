@@ -4,7 +4,7 @@ import SidebarHeader from "../chats/SidebarHeader";
 
 const STYLES = {
   sidebar: {
-    base: "flex md:w-[25%] border-r-[1px] border-r-gray",
+    base: " md:w-[25%] border-r-[1px] border-r-gray",
     visible: "w-[100%] md:w-[30%]",
     hidden: "md:block hidden",
     withSelectedChat: "md:block hidden"

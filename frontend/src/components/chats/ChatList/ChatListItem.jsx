@@ -25,8 +25,10 @@ const ChatListItem = ({ chat, setSelectedChat, loggedUser, selectedChat }) => {
   return (
     <div
       className={`
-        group relative flex items-center gap-3 px-4 py-2 h-[60px] cursor-pointer  border-b-1 border-gray-200
+        group relative flex items-center gap-3 px-4 py-2 h-[60px] cursor-pointer border-b border-gray-200 
         ${isSelected ? 'border-l-2 border-l-blue-600 bg-[#eff6ff]' : ''}
+        ${isSelected ? 'bg-[#eff6ff]' : 'hover:bg-gray-100'}
+
       `}
       onClick={handleSelect}
       onKeyDown={(e) => e.key === 'Enter' && handleSelect()}
