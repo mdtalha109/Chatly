@@ -17,6 +17,9 @@ const SignupPage = () => {
   const [pic, setPic] = useState('');
   const [picPreview, setPicPreview] = useState(null);
   const [loading, setloading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const postDetails = (picFile) => {
     if (!picFile) {
@@ -41,7 +44,7 @@ const SignupPage = () => {
       return;
     }
 
-    setloading(true);
+    setUploadingImage(true);
     setPicPreview(URL.createObjectURL(picFile));
 
     const data = new FormData();
@@ -56,7 +59,14 @@ const SignupPage = () => {
       .then((res) => res.json())
       .then((data) => {
         setPic(data.url.toString());
-        setloading(false);
+        setUploadingImage(false);
+        toast({
+          title: 'Success!',
+          description: 'Profile picture uploaded successfully.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       })
       .catch((err) => {
         console.error(err);
@@ -67,7 +77,8 @@ const SignupPage = () => {
           duration: 5000,
           isClosable: true,
         });
-        setloading(false);
+        setUploadingImage(false);
+        setPicPreview(null);
       });
   };
 
@@ -96,6 +107,8 @@ const SignupPage = () => {
       return;
     }
 
+    setloading(true);
+
     try {
       const config = {
         headers: { 'Content-type': 'application/json' },
@@ -116,8 +129,10 @@ const SignupPage = () => {
       });
 
       localStorage.setItem('userInfo', JSON.stringify(data));
+      setloading(false);
       navigate('/');
     } catch (err) {
+      setloading(false);
       toast({
         title: 'Error',
         description: err?.response?.data?.message || 'Something went wrong',
@@ -129,89 +144,228 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Left Column - Branding */}
-      <div className="hidden md:flex flex-col justify-center items-center w-1/2 bg-blue-600 text-white p-10">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Chatly</h1>
-        <p className="text-lg">Join the community and start connecting instantly!</p>
-        <img
-          src="/assets/signup-illustration.svg"
-          alt="Signup Illustration"
-          className="mt-8 max-w-xs"
-        />
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    
+      <div className="relative w-full max-w-lg">
+        <div className="bg-white/80 rounded-2xl shadow-2xl p-8 space-y-2 border border-gray-100">
 
-      {/* Right Column - Form */}
-      <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6 sm:p-10 bg-white">
-        <form
-          className="w-full max-w-md space-y-4"
-          onSubmit={submitHandler}
-        >
-          <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">
-            Create an Account
-          </h2>
-
-          <Input
-            label="Name"
-            type="text"
-            placeholder="Your name"
-            value={name}
-            onChange={(e) => setname(e.target.value)}
-          />
-          <Input
-            label="Email"
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setemail(e.target.value)}
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setpassword(e.target.value)}
-          />
-          <Input
-            label="Confirm Password"
-            type="password"
-            placeholder="Re-enter password"
-            value={confirmPassword}
-            onChange={(e) => setconfirmPassword(e.target.value)}
-          />
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Profile Picture
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => postDetails(e.target.files[0])}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-            {picPreview && (
-              <img
-                src={picPreview}
-                alt="Preview"
-                className="mt-2 h-20 w-20 rounded-full object-cover border border-gray-300"
-              />
-            )}
+          <div className="text-center space-y-2">
+       
+            <h1 className="text-3xl font-bold">
+              Create Account
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Join us and start connecting with others
+            </p>
           </div>
 
-          <Button type="submit" className="w-full">
-            {loading ? <Spinner size="sm" /> : 'Sign Up'}
-          </Button>
+      
+          <form onSubmit={submitHandler} className="space-y-5">
+            <div className="flex flex-col items-center space-y-3">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                  {picPreview ? (
+                    <img
+                      src={picPreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <svg 
+                      className="w-12 h-12 text-gray-400" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                      />
+                    </svg>
+                  )}
+                </div>
+                <label 
+                  htmlFor="profile-upload"
+                  className="absolute bottom-0 right-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-lg"
+                >
+                  {uploadingImage ? (
+                    <Spinner size="xs" color="white" />
+                  ) : (
+                    <svg 
+                      className="w-4 h-4 text-white" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M12 4v16m8-8H4" 
+                      />
+                    </svg>
+                  )}
+                </label>
+                <input
+                  id="profile-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => postDetails(e.target.files[0])}
+                  className="hidden"
+                  disabled={uploadingImage || loading}
+                />
+              </div>
+              <p className="text-xs text-gray-500">Upload profile picture</p>
+            </div>
 
-          <p className="text-center text-sm mt-4 text-gray-600">
-            Already have an account?{' '}
-            <Link to="/" className="text-blue-600 hover:underline">
-              Login
-            </Link>
-          </p>
-        </form>
+            {/* Name Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 block">
+                Full Name
+              </label>
+              <div className="relative">
+                
+                <Input
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setname(e.target.value)}
+                  className="w-full"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 block">
+                Email Address
+              </label>
+              <div className="relative">
+             
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setemail(e.target.value)}
+                  className="w-full"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Password Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 block">
+                Password
+              </label>
+              <div className="relative">
+                
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setpassword(e.target.value)}
+                  className="w-full"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 block">
+                Confirm Password
+              </label>
+              <div className="relative">
+               
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setconfirmPassword(e.target.value)}
+                  className="w-full"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? (
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading || uploadingImage}
+              className="w-full bg-blue-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+            >
+              {loading ? (
+                <>
+                  <Spinner size="sm" />
+                  <span>Creating account...</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or</span>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link 
+                to="/" 
+                className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default SignupPage
+export default SignupPage;
