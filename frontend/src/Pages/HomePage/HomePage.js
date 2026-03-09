@@ -82,17 +82,10 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-12">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
 
-      {/* Login Card */}
       <div className="relative w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 space-y-4 border border-gray-100">
+        <div className="bg-white/80  rounded-2xl p-8 shadow-2xl space-y-2 border border-gray-200">
           {/* Header */}
           <div className="text-center space-y-2">
           
@@ -171,9 +164,6 @@ const HomePage = () => {
               ) : (
                 <>
                   <span>Sign In</span>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
                 </>
               )}
             </Button>
