@@ -6,12 +6,12 @@ const ChatAvatar = ({ sender, isOnline }) => {
     <div className="relative flex-shrink-0">
       {sender?.pic ? (
         <img
-          className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
+          className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm"
           src={sender.pic}
           alt={sender.name}
         />
       ) : (
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-sm">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-sm">
           <User className="w-6 h-6 text-white" />
         </div>
       )}
