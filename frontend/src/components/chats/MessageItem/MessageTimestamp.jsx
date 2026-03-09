@@ -13,8 +13,8 @@ const MessageTimestamp = memo(({ createdAt, isCurrentUser }) => {
     <time 
       dateTime={moment(createdAt).toISOString()}
       className={`
-        absolute right-1 bottom-0.5 text-xs
-        ${isCurrentUser ? 'text-white opacity-70' : 'text-gray-400'}
+          text-xs
+        ${isCurrentUser ? 'text-dark opacity-70' : 'text-gray-400'}
       `}
       aria-label={`Sent at ${timeString}`}
     >

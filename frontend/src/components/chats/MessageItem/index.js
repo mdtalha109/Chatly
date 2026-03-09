@@ -24,7 +24,7 @@ const useMessageLayout = (messages, message, index, userId) => {
 const useMessageStyles = (isCurrentUser, marginLeft, marginTop) => {
   return {
     container: `
-      relative max-w-[75%] rounded-md border border-gray-200 p-2 pr-16
+      relative max-w-[75%] rounded-lg border border-gray-200 px-2 py-1 pr-16
       ${isCurrentUser 
         ? 'bg-blue-500 text-white' 
         : 'bg-white text-black'
@@ -33,7 +33,7 @@ const useMessageStyles = (isCurrentUser, marginLeft, marginTop) => {
     spacing: {
       marginLeft,
       marginTop,
-      marginRight: 10,
+      marginRight: 0,
     }
   };
 };
@@ -65,16 +65,12 @@ const MessageItem = memo(({
 
   return (
     <div 
-      className={`flex items-end gap-2 ${className}`}
+      className={`flex flex-col gap-[1px] items-end gap-2 ${className}`}
       ref={scrollRef}
       role="listitem"
       aria-label={`Message from ${message.sender?.name || 'Unknown user'}`}
       {...props}
     >
-      {/* <MessageAvatar
-        sender={message.sender} 
-        shouldShow={shouldShowAvatar} 
-      /> */}
 
       <div 
         className={container}
@@ -91,13 +87,12 @@ const MessageItem = memo(({
           ) : (
             <MessageText content={message.content} />
           )}
-
-          <MessageTimestamp 
-            createdAt={message.createdAt} 
-            isCurrentUser={isCurrentUser} 
-          />
         </div>
       </div>
+      <MessageTimestamp
+        createdAt={message.createdAt}
+        isCurrentUser={isCurrentUser}
+      />
     </div>
   );
 });
