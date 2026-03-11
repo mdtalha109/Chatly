@@ -3,6 +3,7 @@ import Button from '../Button';
 import { IconCircleXFilled } from '@tabler/icons-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const ModalContext = createContext();
 
@@ -16,6 +17,8 @@ function Modal({ children, isOpen, onClose, width, closeOverlay = false, variant
     'dialog': ''
   }
 
+    const containerRef = useFocusTrap(isOpen)
+
   return (
     <AnimatePresence>
     {isOpen && (
@@ -27,6 +30,7 @@ function Modal({ children, isOpen, onClose, width, closeOverlay = false, variant
         onClick={closeOverlay}
       >
         <motion.div
+          ref={containerRef}
           initial={{ opacity: 0, scale: 0.1}}
           animate={{ opacity: 1,scale:1 }}
           exit={{ opacity: 0, scale: 0.1 }}
