@@ -26,7 +26,9 @@ const chatModel = mongoose.Schema({
     groupAdmin : {
         type: mongoose.Schema.Types.ObjectId,
         ref : "User"
-    }
+    },
+    chatType: { type: String, enum: ['regular', 'pdf'], default: 'regular' },
+    pdfDocument: { type: mongoose.Schema.Types.ObjectId, ref: "PDFDocument" }
 }, {
     timeStamps: true
 })

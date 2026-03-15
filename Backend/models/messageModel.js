@@ -20,6 +20,7 @@ const messageModel = mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref  : "Chat"
     },
+    isAIResponse: { type: Boolean, default: false }, // New field
     createdAt: { type: Date, default: Date.now }
 
 }, {
