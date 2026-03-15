@@ -1,5 +1,6 @@
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
+const PDFDocument = require("../models/pdfDocumentModel");
 const ApiError = require("../utils/apiError");
 const ApiResponse = require("../utils/apiResponse");
 const asyncHandler = require("../utils/asyncHandler");
@@ -58,23 +59,33 @@ const accessChat = asyncHandler(async (req, res) => {
 //@access          Protected
 const fetchChats = asyncHandler(async (req, res) => {
   try {
-    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
-      .populate("users", "-password")
-      .populate("groupAdmin", "-password")
-      .populate("latestMessage")
-      .then(async (results) => {
-        results = results.sort((a, b) => {
-          const first_date = new Date(a.latestMessage?.createdAt);
-          const second_date = new Date(b.latestMessage?.createdAt);
-          return second_date - first_date;
-        });
-       
-        results = await User.populate(results, {
-          path: "latestMessage.sender",
-          select: "name pic email",
-        });
-        res.status(200).send(new ApiResponse(200, "chat fetched successfully!", results, true));
-      });
+  Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+  .populate("users", "-password")
+  .populate("groupAdmin", "-password")
+  .populate("latestMessage")
+  .then(async (results) => {
+
+    results.sort((a, b) => {
+      const dateA = a.latestMessage?.createdAt
+        ? new Date(a.latestMessage.createdAt).getTime()
+        : 0;
+
+      const dateB = b.latestMessage?.createdAt
+        ? new Date(b.latestMessage.createdAt).getTime()
+        : 0;
+
+      return dateB - dateA;
+    });
+
+    results = await User.populate(results, {
+      path: "latestMessage.sender",
+      select: "name pic email",
+    });
+
+    res
+      .status(200)
+      .send(new ApiResponse(200, "chat fetched successfully!", results, true));
+  });
   } catch (error) {
     
     throw new ApiError(400, "something went wrong")
@@ -196,6 +207,75 @@ const addToGroup = asyncHandler(async (req, res) => {
   }
 });
 
+//@description     Create PDF Chat
+//@route           POST /api/chat/pdf/create
+//@access          Protected
+const createPdfChat = asyncHandler(async (req, res) => {
+  const { pdfDocumentId } = req.body;
+
+  if (!pdfDocumentId) {
+    throw new ApiError(400, "PDF document ID is required");
+  }
+
+  // Verify pdfDocumentId exists
+  const pdfDocument = await PDFDocument.findById(pdfDocumentId);
+  if (!pdfDocument) {
+    throw new ApiError(404, "PDF document not found");
+  }
+
+  // get ai user from the db (it will act as second person in the chat)
+  const aiUser = await User.findOne({ email: "ai@assistant.internal" });
+  if (!aiUser) {
+    throw new ApiError(404, "AI user not found. Please run the seed script to create AI user.");
+  }
+  
+  let existingChat = await Chat.findOne({
+    chatType: 'pdf',
+    pdfDocument: pdfDocumentId,
+    users: { $all: [req.user._id, aiUser._id] }
+  })
+    .populate("users", "-password")
+    .populate("pdfDocument");
+
+  if (existingChat) {
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        "PDF chat already exists",
+        existingChat,
+        true
+      )
+    );
+  }
+
+  // Create new PDF chat
+  const chatData = {
+    chatName: `Chat with ${pdfDocument.fileName}`,
+    isGroupChat: false,
+    chatType: 'pdf',
+    users: [req.user._id, aiUser._id],
+    pdfDocument: pdfDocumentId
+  };
+
+  try {
+    const createdChat = await Chat.create(chatData);
+    const fullChat = await Chat.findOne({ _id: createdChat._id })
+      .populate("users", "-password")
+      .populate("pdfDocument");
+
+    res.status(201).json(
+      new ApiResponse(
+        201,
+        "PDF chat created successfully",
+        fullChat,
+        true
+      )
+    );
+  } catch (error) {
+    throw new ApiError(400, "Error creating PDF chat: " + error.message);
+  }
+});
+
 module.exports = {
   accessChat,
   fetchChats,
@@ -203,4 +283,5 @@ module.exports = {
   renameGroup,
   addToGroup,
   removeFromGroup,
+  createPdfChat,
 };
