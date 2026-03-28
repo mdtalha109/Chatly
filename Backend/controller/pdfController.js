@@ -5,10 +5,11 @@ const User = require("../models/userModel");
 const cloudinary = require("cloudinary").v2;
 const { processPDF, queryPDF } = require("../services/langchainService");
 
+// Configure Cloudinary (ensure env vars are set)
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'talhapro321',
-  api_key: process.env.CLOUDINARY_API_KEY || '635686547261266',
-  api_secret: process.env.CLOUDINARY_API_SECRET || '5MBkvs7lpibiRimZBUJbQf12wdE',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 exports.uploadPdf = async (req, res) => {
@@ -32,12 +33,16 @@ exports.uploadPdf = async (req, res) => {
       }
     });
 
+    // Process PDF with LangChain from LOCAL file (extract, chunk, embed, store)
     try {
+      console.log("Processing PDF with LangChain from local file...");
       const { chunkCount, embeddingModel } = await processPDF(
-        req.file.path,
+        req.file.path, // Use local file path
         pdfDoc._id.toString()
       );
 
+      // Upload to Cloudinary AFTER processing
+      console.log("Uploading PDF to Cloudinary...");
       const result = await cloudinary.uploader.upload(req.file.path, {
         resource_type: "raw",
         folder: "pdfs",
@@ -45,6 +50,7 @@ exports.uploadPdf = async (req, res) => {
 
       console.log("Cloudinary upload result:", result);
 
+      // Update document with Cloudinary URL and processing metadata
       pdfDoc.pdfUrl = result.secure_url;
       pdfDoc.cloudinaryId = result.public_id;
       pdfDoc.metadata = {
@@ -72,6 +78,7 @@ exports.uploadPdf = async (req, res) => {
     } catch (processingError) {
       console.error("Error processing PDF:", processingError.message);
       
+      // Update status to 'failed'
       pdfDoc.metadata = {
         ...pdfDoc.metadata,
         processingStatus: 'failed',
@@ -153,6 +160,7 @@ exports.queryPdf = async (req, res) => {
       });
     }
 
+    // Store user message immediately
     let userMessage = await Message.create({
       sender: req.user._id,
       content: question,
@@ -187,13 +195,12 @@ exports.queryPdf = async (req, res) => {
       })}\n\n`);
 
       let fullAnswer = '';
-      let tokenUsage = {};
 
       try {
         // Query PDF with streaming
         console.log(`[STREAM] Querying PDF ${pdfDoc._id} with question: ${question}`);
         
-        const result = await queryPDF(pdfDoc._id.toString(), question, {
+        fullAnswer = await queryPDF(pdfDoc._id.toString(), question, {
           stream: true,
           onChunk: (chunk) => {
             // Send each chunk to client
@@ -204,9 +211,6 @@ exports.queryPdf = async (req, res) => {
             })}\n\n`);
           }
         });
-
-        fullAnswer = result.answer;
-        tokenUsage = result.tokenUsage;
 
         // Store complete AI response in database
         const aiMessage = await Message.create({
@@ -223,11 +227,10 @@ exports.queryPdf = async (req, res) => {
 
         await aiMessage.populate("sender", "name pic email");
 
-        // Send final event with complete message and token usage
+        // Send final event with complete message
         res.write(`data: ${JSON.stringify({ 
           type: 'done', 
-          aiMessage,
-          tokenUsage 
+          aiMessage 
         })}\n\n`);
 
         res.end();
@@ -242,9 +245,7 @@ exports.queryPdf = async (req, res) => {
     } else {
       // Regular non-streaming mode
       console.log(`Querying PDF ${pdfDoc._id} with question: ${question}`);
-      const result = await queryPDF(pdfDoc._id.toString(), question);
-      const aiAnswer = result.answer;
-      const tokenUsage = result.tokenUsage;
+      const aiAnswer = await queryPDF(pdfDoc._id.toString(), question);
 
       // Store AI response
       const aiMessage = await Message.create({
@@ -261,13 +262,15 @@ exports.queryPdf = async (req, res) => {
 
       await aiMessage.populate("sender", "name pic email");
 
+      // TODO: Emit socket event for real-time updates
+      // io.to(chatId).emit("message received", aiMessage);
+
       res.status(200).json({
         success: true,
         message: "Query processed successfully",
         data: {
           userMessage,
           aiMessage,
-          tokenUsage,
         }
       });
     }
