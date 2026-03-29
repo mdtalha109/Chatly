@@ -28,59 +28,63 @@ const SingleChat = ({ setShowChatList, showChatList }) => {
         sendMessage,
         handleImageUpload,
         istyping,
-        isUserActive,  
+        isUserActive,
+        aiThinking  
     } = useSingleChat()
 
 
     return (
         <>
             {   selectedChat ? (
-                    <div className='h-full w-full flex flex-col'>
+                <div className='h-screen w-full flex flex-col'>
 
-                        {/* Chat Header */}
-                        <ChatHeader
-                            selectedChat={selectedChat}
-                            setSelectedChat={setSelectedChat}
-                            user={user}
-                            isUserActive={isUserActive}
-                        />
+                    {/* Chat Header */}
+                    <ChatHeader
+                        selectedChat={selectedChat}
+                        setSelectedChat={setSelectedChat}
+                        user={user}
+                        isUserActive={isUserActive}
+                    />
 
-                        <div className="flex flex-col p-2 justify-end w-full bg-[#f8f9fa] items-stretch flex-1  overflow-y-scroll">
-                            {loading ? (
-                                <Spinner
-                                    size="xl"
-                                    w={20}
-                                    h={20}
-                                    alignSelf="center"
-                                    margin="auto"
-                                />
-                            ) : <>
+                    <div className="flex flex-col p-2 justify-end w-full bg-[#f8f9fa] items-stretch flex-1  overflow-hidden ">
+                        {loading ? (
+                            <Spinner
+                                size="xl"
+                                w={20}
+                                h={20}
+                                alignSelf="center"
+                                margin="auto"
+                            />
+                        ) : <>
 
-                                {/* Main chat body */}
-                                <ScrollableChat
-                                    messages={messages}
-                                />
 
-                            </>
+                            <ScrollableChat
+                                messages={messages}
+                            />
+
+                        </>
+                        }
+                        {istyping ? 'typing' : null}
+
+                        <div className="flex flex-col mt-10 md:gap-5 gap-2 items-stretch">
+                            {
+                                image ?
+                                    <UploadImagePreview image={image} />
+                                    : <></>
                             }
-                            {istyping ? 'typing' : null}
-
-                            <div className="flex flex-col mt-10 md:gap-5 gap-2 items-stretch">
-                                {
-                                    image ?
-                                        <UploadImagePreview image={image} />
-                                        : <></>
-                                }
-                                <ChatFooter
-                                    chatInputRef={chatInputRef}
-                                    typingHandler={typingHandler}
-                                    newMessage={newMessage}
-                                    sendMessage={sendMessage}
-                                    handleImageUpload={handleImageUpload} />
-                            </div>
-
+                            <ChatFooter
+                                chatInputRef={chatInputRef}
+                                selectedChat={selectedChat}
+                                typingHandler={typingHandler}
+                                newMessage={newMessage}
+                                sendMessage={sendMessage}
+                                handleImageUpload={handleImageUpload}
+                                aiThinking={aiThinking}
+                            />
                         </div>
+
                     </div>
+                </div>
                 ) : (
                     <NonSelectedChat
                         selectedChat={selectedChat}

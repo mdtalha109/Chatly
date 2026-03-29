@@ -6,6 +6,7 @@ import { BaseConfig } from '../../../../config/baseConfig';
 import { socketEvent } from '../../../../constant/socket';
 import useSocket from '../../../../hooks/useSocket';
 import { messageService } from '../../../../services/messageService';
+import { pdfService } from '../../../../services/pdfService';
 
 var socket, selectedChatCompare;
 
@@ -18,9 +19,12 @@ const useSingleChat = () => {
     const [typing, setTyping] = useState(false);
     const [istyping, setIsTyping] = useState(false);
     const [isUserActive, setUserisActive] = useState(false);
+    const [aiThinking, setAiThinking] = useState(false);
+    const [streamingMessageId, setStreamingMessageId] = useState(null);
 
     const chatInputRef = useRef(null);
     const timeoutIdRef = useRef(null);
+    const abortControllerRef = useRef(null);
 
     // Use the shared socket hook
     const { socket, socketConnected, userStatuses } = useSocket();
@@ -51,11 +55,26 @@ const useSingleChat = () => {
 
     // Handle chat selection
     useEffect(() => {
+        // Cancel any ongoing stream when switching chats
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+            abortControllerRef.current = null;
+        }
+        setStreamingMessageId(null);
+        setAiThinking(false);
         setMessages([]);
         fetchMessages();
         chatInputRef.current && chatInputRef.current.focus();
         selectedChatCompare = selectedChat;
     }, [selectedChat]);
+
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     // Handle incoming messages
     useEffect(() => {
@@ -139,57 +158,182 @@ const useSingleChat = () => {
     };
 
     const sendMessage = async (e) => {
-        if ((newMessage || image) && socket) {
-            socket.emit(socketEvent.NEW_MESSAGE, {
-                sender: {
-                    _id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    pic: user.pic
-                },
-                content: newMessage,
-                image: image,
-                chat: {
-                    _id: selectedChat._id,
-                    users: selectedChat.users
-                },
-                createdAt: new Date()
-            });
+        
+        const isPdfChat = selectedChat?.chatType === 'pdf';
 
-            setChats(prevChats => prevChats.map((chat) => {
-                if (chat._id === selectedChat._id) {
-                    if (!chat.latestMessage) {
-                        chat.latestMessage = {};
-                        chat.latestMessage.sender = {
-                            name: user.name,
-                            email: user.email
-                        };
-                    }
-                    chat.latestMessage.content = newMessage;
-                    chat.latestMessage.createdAt = new Date();
-                }
-                return chat;
-            }));
+        if (isPdfChat) {
+            if (!newMessage?.trim()) return;
+            if (aiThinking) return; // Prevent sending while AI is responding
 
-            setMessages((prevMessages) => [...prevMessages, {
-                sender: {
-                    _id: user._id,
-                },
-                content: newMessage,
-                image: image,
-                chat: {
-                    users: selectedChat.users
-                },
-                createdAt: new Date()
-            }]);
+            const question = newMessage;
 
-            try {
+            // Cancel any ongoing stream
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+
+            try{
                 setNewMessage('');
-                setImage(null);
+                const userMessage = {
+                    sender: {
+                        _id: user._id,
+                        name: user.name,
+                        pic: user.pic,
+                    },
+                    content: question,
+                    chat: {
+                        _id: selectedChat._id,
+                        users: selectedChat.users
+                    },
+                    isAIResponse: false,
+                    createdAt: new Date()
+                };
 
-                await messageService.sendMessage(selectedChat._id, newMessage, image, user.token);
+                // Add user message
+                setMessages((prevMessages) => [...prevMessages, userMessage]);
+                setAiThinking(true);
+
+                // Create placeholder AI message for streaming
+                const tempMessageId = `temp-${Date.now()}`;
+                const placeholderMessage = {
+                    _id: tempMessageId,
+                    sender: {
+                        _id: 'ai',
+                        name: 'AI Assistant',
+                        pic: '',
+                        email: 'ai@chatly.com'
+                    },
+                    content: '',
+                    chat: {
+                        _id: selectedChat._id,
+                        users: selectedChat.users
+                    },
+                    isAIResponse: true,
+                    isStreaming: true,
+                    createdAt: new Date()
+                };
+
+                setMessages((prevMessages) => [...prevMessages, placeholderMessage]);
+                setStreamingMessageId(tempMessageId);
+
+                // Create new AbortController for this request
+                abortControllerRef.current = new AbortController();
+
+                // Start streaming
+                await pdfService.queryPdfStream(
+                    selectedChat._id,
+                    question,
+                    {
+                        onStart: (userMsg) => {
+                            console.log('Streaming started:', userMsg);
+                        },
+                        onChunk: (chunk) => {
+                            // Append chunk to the streaming message
+                            setMessages((prevMessages) => 
+                                prevMessages.map((msg) => 
+                                    msg._id === tempMessageId
+                                        ? { ...msg, content: msg.content + chunk }
+                                        : msg
+                                )
+                            );
+                        },
+                        onDone: (aiMessage) => {
+                            // Replace placeholder with complete message from backend
+                            setMessages((prevMessages) => 
+                                prevMessages.map((msg) => 
+                                    msg._id === tempMessageId
+                                        ? { ...aiMessage, isStreaming: false }
+                                        : msg
+                                )
+                            );
+                            setStreamingMessageId(null);
+                            setAiThinking(false);
+
+                            // Update chat's latest message
+                            setChats(prevChats => prevChats.map((chat) => {
+                                if (chat._id === selectedChat._id) {
+                                    if (!chat.latestMessage) {
+                                        chat.latestMessage = {};
+                                    }
+                                    chat.latestMessage.content = aiMessage.content;
+                                    chat.latestMessage.createdAt = aiMessage.createdAt;
+                                    chat.latestMessage.sender = aiMessage.sender;
+                                }
+                                return chat;
+                            }));
+                        },
+                        onError: (error) => {
+                            console.error('Streaming error:', error);
+                            // Remove placeholder message on error
+                            setMessages((prevMessages) => 
+                                prevMessages.filter((msg) => msg._id !== tempMessageId)
+                            );
+                            setStreamingMessageId(null);
+                            setAiThinking(false);
+                        }
+                    },
+                    abortControllerRef.current.signal
+                );
+
+                abortControllerRef.current = null;
             } catch (error) {
-                console.error('Error sending message:', error);
+                console.error('Error querying PDF:', error);
+                setAiThinking(false);
+                setStreamingMessageId(null);
+            }
+        } else {
+            if ((newMessage || image) && socket) {
+                socket.emit(socketEvent.NEW_MESSAGE, {
+                    sender: {
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        pic: user.pic
+                    },
+                    content: newMessage,
+                    image: image,
+                    chat: {
+                        _id: selectedChat._id,
+                        users: selectedChat.users
+                    },
+                    createdAt: new Date()
+                });
+
+                setChats(prevChats => prevChats.map((chat) => {
+                    if (chat._id === selectedChat._id) {
+                        if (!chat.latestMessage) {
+                            chat.latestMessage = {};
+                            chat.latestMessage.sender = {
+                                name: user.name,
+                                email: user.email
+                            };
+                        }
+                        chat.latestMessage.content = newMessage;
+                        chat.latestMessage.createdAt = new Date();
+                    }
+                    return chat;
+                }));
+
+                setMessages((prevMessages) => [...prevMessages, {
+                    sender: {
+                        _id: user._id,
+                    },
+                    content: newMessage,
+                    image: image,
+                    chat: {
+                        users: selectedChat.users
+                    },
+                    createdAt: new Date()
+                }]);
+
+                try {
+                    setNewMessage('');
+                    setImage(null);
+
+                    await messageService.sendMessage(selectedChat._id, newMessage, image, user.token);
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                }
             }
         }
     };
@@ -246,7 +390,9 @@ const useSingleChat = () => {
         istyping,
         isUserActive,
         socketConnected,
-        userStatuses
+        userStatuses,
+        aiThinking,
+        streamingMessageId
     };
 };
 
