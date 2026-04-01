@@ -40,7 +40,7 @@ const ChatListItem = ({ chat, setSelectedChat, loggedUser, selectedChat }) => {
       <div className="flex-1 min-w-0">
         <ChatContent
           chat={chat}
-          senderName={getSenderName(loggedUser, chat)}
+          senderName={chat?.chatType === 'pdf' ? chat?.chatName : getSenderName(loggedUser, chat)}
           loggedUser={loggedUser}
           isSelected={isSelected}
         />
