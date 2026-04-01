@@ -5,7 +5,7 @@ const ChatLayout = ({ children, user }) => {
   
   return (
     <SocketProvider>
-      <div className="flex w-full h-screen">
+      <div className="flex w-full max-h-[100dvh] overflow-hidden">
         {children}
       </div>
     </SocketProvider>
