@@ -5,14 +5,19 @@ import { chatService } from '../../../../services/chatService';
 
 const useChatList = () => {
   const [loggedUser, setLoggedUser] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
   const toast = useToast();
 
   const fetchChats = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
       const fetchedChats = await chatService.fetchChats(user?.token);
       setChats(fetchedChats);
     } catch (error) {
+      setError(error);
       toast({
         title: "Error Occured!",
         description: "Failed to Load the chats",
@@ -21,6 +26,8 @@ const useChatList = () => {
         isClosable: true,
         position: "bottom-left",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,7 +45,10 @@ const useChatList = () => {
     chats,
     setSelectedChat,
     selectedChat,
-    loggedUser
+    loggedUser,
+    isLoading,
+    error,
+    retry: fetchChats
   }
 }
 
