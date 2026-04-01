@@ -4,7 +4,7 @@ import ChatListSkeleton from '../ChatListSkeleton';
 import NoChatsAvailable from './NoChatsAvailable';
 import ChatListContent from './ChatListContent';
 import ChatListHeader from './ChatListHeader';
-
+import ErrorLoadingChats from './ErrorLoadingChats';
 
 
 import UserSearchModal from '../UserSearchModal';
@@ -16,7 +16,10 @@ const ChatList = () => {
     chats,
     setSelectedChat,
     selectedChat,
-    loggedUser
+    loggedUser,
+    isLoading,
+    error,
+    retry
   } = useChatList();
 
   const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)
@@ -40,23 +43,27 @@ const ChatList = () => {
 
   return (
     <>
-    <div className="flex flex-col items-center w-full">
-      <div className="flex flex-col bg-white w-full h-full overflow-hidden">
+    <div className="flex flex-col bg-white max-h-[90dvh] ">
+      
         <ChatListHeader searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsUserSearchModalOpen={setIsUserSearchModalOpen}/>
 
-        {!chats ? (
-          <ChatListSkeleton />
-        ) : filteredChats.length === 0 ? (
-          <NoChatsAvailable message="No chats match your search." />
-        ) : (
-          <ChatListContent
-            chats={filteredChats}
-            selectedChat={selectedChat}
-            setSelectedChat={setSelectedChat}
-            loggedUser={loggedUser}
-          />
-        )}
-      </div>
+        <div className=" overflow-y-auto ">
+          {error ? (
+            <ErrorLoadingChats onRetry={retry} />
+          ) : !chats || isLoading ? (
+            <ChatListSkeleton />
+          ) : filteredChats.length === 0 ? (
+            <NoChatsAvailable message="No chats match your search." />
+          ) : (
+            <ChatListContent
+              chats={filteredChats}
+              selectedChat={selectedChat}
+              setSelectedChat={setSelectedChat}
+              loggedUser={loggedUser}
+            />
+          )}
+        </div>
+     
     </div>
 
 
