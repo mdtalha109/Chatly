@@ -4,6 +4,7 @@ const { ChatGroq } = require("@langchain/groq");
 const { RecursiveCharacterTextSplitter } = require("langchain/text_splitter");
 const { Document } = require("langchain/document");
 const { HuggingFaceInferenceEmbeddings } = require("@langchain/community/embeddings/hf");
+const { HumanMessage, AIMessage, SystemMessage } = require("@langchain/core/messages");
 const { extractTextFromPdf } = require("./pdfProcessingService");
 const path = require("path");
 
@@ -180,14 +181,7 @@ async function queryPDF(pdfId, question, options = {}) {
             if (options.stream && options.onChunk) {
                 options.onChunk(fallbackMsg);
             }
-            return {
-                answer: fallbackMsg,
-                tokenUsage: {
-                    promptTokens: 0,
-                    completionTokens: 0,
-                    totalTokens: 0
-                }
-            };
+            return fallbackMsg;
         }
 
         // Extract the text from matched chunks
@@ -206,13 +200,30 @@ async function queryPDF(pdfId, question, options = {}) {
             streaming: options.stream || false,
         });
 
-        // Create a prompt with context and question
-        const prompt = `Based on the following context from a document, please answer the question. If the answer cannot be found in the context, say so.
+        // Build messages array using LangChain's native message types
+        const messages = [
+            new SystemMessage(
+                "You are a helpful assistant answering questions about a PDF document. " +
+                "Use the context from the document to provide accurate answers. " +
+                "If the answer cannot be found in the context, say so."
+            ),
+            new SystemMessage(`Context from document:\n${context}`),
+        ];
 
-        Context: ${context}
-        Question: ${question}
+        // Add conversation history as HumanMessage/AIMessage pairs
+        if (options.chatHistory && options.chatHistory.length > 0) {
+            options.chatHistory.forEach(msg => {
+                if (msg.role === 'user') {
+                    messages.push(new HumanMessage(msg.content));
+                } else {
+                    messages.push(new AIMessage(msg.content));
+                }
+            });
+        }
 
-        Answer:`;
+        // Add current question
+        messages.push(new HumanMessage(question));
+
 
         // Handle streaming vs non-streaming
         if (options.stream && options.onChunk) {
@@ -224,10 +235,9 @@ async function queryPDF(pdfId, question, options = {}) {
                 totalTokens: 0
             };
             
-            const stream = await llm.stream(prompt);
+            const stream = await llm.stream(messages);
             
             for await (const chunk of stream) {
-                console.log('Received chunk:', chunk);
                 const text = chunk.content || '';
                 if (text) {
                     fullAnswer += text;
@@ -244,15 +254,10 @@ async function queryPDF(pdfId, question, options = {}) {
                 }
             }
             
-            console.log('Token usage:', tokenUsage);
-            
-            return {
-                answer: fullAnswer,
-                tokenUsage
-            };
+            return fullAnswer;
         } else {
             // Regular mode (non-streaming)
-            const response = await llm.invoke(prompt);
+            const response = await llm.invoke(messages);
             const answer = typeof response.content === 'string' 
                 ? response.content 
                 : response.content[0]?.text || response.text || 'No answer generated';
@@ -264,12 +269,7 @@ async function queryPDF(pdfId, question, options = {}) {
                 totalTokens: response.response_metadata?.usage?.total_tokens || 0
             };
             
-            console.log('Token usage:', tokenUsage);
-            
-            return {
-                answer,
-                tokenUsage
-            };
+            return answer;
         }
     } catch (error) {
         throw new Error(`Failed to query PDF: ${error.message}`);
