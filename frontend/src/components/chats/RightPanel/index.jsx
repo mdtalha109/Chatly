@@ -2,7 +2,7 @@ import ChatBox from "../ChatBox";
 
 const STYLES = {
   rightPanel: {
-    base: "flex flex-1 md:max-w-[75%] overflow-y-hidden bg-blue-700",
+    base: "md:max-w-[75%] w-full",
     withSelectedChat: "md:block block"
   }
 };
